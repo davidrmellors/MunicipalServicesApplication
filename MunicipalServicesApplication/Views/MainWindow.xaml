@@ -1,0 +1,143 @@
+﻿<Window x:Class="MunicipalServicesApplication.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Main Menu" Height="600" Width="800"
+        WindowStartupLocation="CenterScreen" Background="#2c3e50"
+        Icon="../Resources/zaFlag.ico"
+        MinHeight="600" MinWidth="600">
+    <Grid Margin="20">
+        <!-- Define the layout grid -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <!-- Title -->
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <!-- Buttons -->
+            <RowDefinition Height="*" />
+            <!-- DataGrid -->
+        </Grid.RowDefinitions>
+
+        <!-- Main Title -->
+        <TextBlock Text="Municipal Services Platform" FontSize="28" FontWeight="Bold" Foreground="White"
+                   HorizontalAlignment="Center" Margin="0,10"/>
+
+        <!-- StackPanel for buttons -->
+        <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center" Width="300" Grid.Row="1" Margin="0,20,0,20">
+            <!-- Report Issues Button -->
+            <Button x:Name="btnReportIssues" Content="Report an Issue" Click="btnReportIssues_Click" Margin="0,10"
+                    Background="#1abc9c" Foreground="White" Padding="10" FontWeight="Bold" Width="200" HorizontalAlignment="Center">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#1abc9c"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#16a085"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <!-- Local Events and Announcements Button (Disabled) -->
+            <Button x:Name="btnEvents" Content="Local Events and Announcements" IsEnabled="False" Margin="0,10"
+                    Background="#95a5a6" Foreground="LightGray" Padding="10" FontWeight="Bold" Width="200" HorizontalAlignment="Center"/>
+
+            <!-- Service Request Status Button (Disabled) -->
+            <Button x:Name="btnStatus" Content="Service Request Status" IsEnabled="False" Margin="0,10"
+                    Background="#95a5a6" Foreground="LightGray" Padding="10" FontWeight="Bold" Width="200" HorizontalAlignment="Center"/>
+
+            <!-- Exit Button -->
+            <Button x:Name="btnExit" Content="Exit" Click="btnExit_Click" Margin="0,30"
+                    Background="#e74c3c" Foreground="White" Padding="10" FontWeight="Bold" Width="200" HorizontalAlignment="Center">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#e74c3c"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#c0392b"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
+
+        <!-- Section Title for DataGrid -->
+        <TextBlock Text="Reported Issues" FontSize="18" FontWeight="SemiBold" Foreground="White"
+                   HorizontalAlignment="Left" Grid.Row="2" Margin="10,0,0,10"/>
+
+        <!-- DataGrid for displaying reported issues -->
+        <DataGrid x:Name="IssuesDataGrid" AutoGenerateColumns="False" HeadersVisibility="Column"
+                  Background="#34495e" Foreground="White" CanUserAddRows="False" Grid.Row="2" Margin="10,40,10,10"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto" ColumnWidth="*"
+                  BorderThickness="0" GridLinesVisibility="None" RowBackground="#2c3e50" AlternatingRowBackground="#34495e">
+            <!-- Style for DataGrid's column headers -->
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#1abc9c"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="BorderBrush" Value="#2c3e50"/>
+                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+
+                    <Setter Property="Padding" Value="5,0,0,0"/>
+                    <!-- Adds 10px left padding -->
+
+                    <!-- Optional: Align content to the left -->
+                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+
+            <!-- Style for DataGrid's rows -->
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="FontWeight" Value="Normal"/>
+                    <Setter Property="BorderBrush" Value="#2c3e50"/>
+                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#16a085"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="*"/>
+                <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="*"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+
+                <!-- Template column for displaying and clicking attachments -->
+                <DataGridTemplateColumn Header="Attachments" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ItemsControl ItemsSource="{Binding Attachments}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <Hyperlink NavigateUri="{Binding}" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="{Binding}" Foreground="#1abc9c"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+
+    <!-- Add a Fade-In Animation for the Window -->
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+</Window>
