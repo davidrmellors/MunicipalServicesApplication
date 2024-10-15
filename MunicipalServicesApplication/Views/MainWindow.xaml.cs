@@ -1,46 +1,59 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Navigation;
 using MunicipalServicesApplication.Models;
 
 namespace MunicipalServicesApplication.Views
 {
     public partial class MainWindow : Window
     {
+        private List<Issue> AllIssues;
+
         public MainWindow()
         {
             InitializeComponent();
-            IssuesItemsControl.ItemsSource = Issue.ReportedIssues;
+            AllIssues = Issue.ReportedIssues.ToList();
+            UpdateIssuesDisplay();
         }
 
-        private void BtnReportIssues_Click(object sender, RoutedEventArgs e)
+        private void UpdateIssuesDisplay()
         {
-            ReportIssuesWindow reportIssuesWindow = new ReportIssuesWindow();
-            reportIssuesWindow.Width = this.Width;
-            reportIssuesWindow.Height = this.Height;
-            this.Hide(); // Hide the MainWindow
-            reportIssuesWindow.Closed += (s, args) =>
-            {
-                this.Show(); // Show the MainWindow when ReportIssuesWindow is closed
-                IssuesItemsControl.Items.Refresh();
-            };
-            reportIssuesWindow.Show();
+            IssuesItemsControl.ItemsSource = AllIssues;
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string searchText = SearchBox.Text.ToLower();
+            var filteredIssues = AllIssues.Where(issue =>
+                issue.Location.ToLower().Contains(searchText) ||
+                issue.Category.ToLower().Contains(searchText) ||
+                issue.Description.ToLower().Contains(searchText) ||
+                issue.Attachments.Any(attachment => attachment.Name.ToLower().Contains(searchText))
+            ).ToList();
+
+            IssuesItemsControl.ItemsSource = filteredIssues;
         }
 
         private void ViewAttachment_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is string base64String)
+            if (sender is Button button && button.DataContext is Attachment attachment)
             {
                 try
                 {
-                    byte[] fileBytes = Convert.FromBase64String(base64String);
-                    string tempFilePath = Path.GetTempFileName();
+                    byte[] fileBytes = Convert.FromBase64String(attachment.Content);
+                    string tempFilePath = Path.Combine(Path.GetTempPath(), attachment.Name);
                     File.WriteAllBytes(tempFilePath, fileBytes);
 
-                    Process.Start(new ProcessStartInfo(tempFilePath) { UseShellExecute = true });
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = tempFilePath,
+                        UseShellExecute = true
+                    };
+                    Process.Start(psi);
                 }
                 catch (Exception ex)
                 {
@@ -48,8 +61,6 @@ namespace MunicipalServicesApplication.Views
                 }
             }
         }
-
-
 
         private void BtnEvents_Click(object sender, RoutedEventArgs e)
         {
@@ -62,6 +73,21 @@ namespace MunicipalServicesApplication.Views
                 this.Show(); // Show the MainWindow when LocalEventsWindow is closed
             };
             localEventsWindow.Show();
+        }
+
+        private void BtnReportIssues_Click(object sender, RoutedEventArgs e)
+        {
+            ReportIssuesWindow reportIssuesWindow = new ReportIssuesWindow();
+            reportIssuesWindow.Width = this.Width;
+            reportIssuesWindow.Height = this.Height;
+            this.Hide();
+            reportIssuesWindow.Closed += (s, args) =>
+            {
+                this.Show();
+                AllIssues = Issue.ReportedIssues.ToList();
+                UpdateIssuesDisplay();
+            };
+            reportIssuesWindow.Show();
         }
 
 

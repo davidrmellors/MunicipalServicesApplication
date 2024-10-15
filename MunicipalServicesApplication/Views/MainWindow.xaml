@@ -21,21 +21,31 @@
             <GradientStop Color="#F0F0F0" Offset="0"/>
             <GradientStop Color="#E0E0E0" Offset="1"/>
         </LinearGradientBrush>
+
+        <Style x:Key="SidebarListViewItemStyle" TargetType="ListViewItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E0E0E0"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#D0D0D0"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <Grid>
-
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
 
         <!-- South African Flag Color Accent -->
-        <Grid Grid.Row="0" Grid.ColumnSpan="2" Height="10">
+        <Grid Height="6">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -52,62 +62,86 @@
             <Rectangle Grid.Column="5" Fill="#000000"/>
         </Grid>
 
-        <!-- Sidebar -->
-        <Grid Grid.Row="1" Grid.Column="0" Background="{StaticResource PrimaryColor}">
-            <StackPanel>
-                <Image Source="../Resources/zaCoatOfArms.ico" Height="100" Margin="0,20,0,20"/>
-                <TextBlock Text="Municipal Services" FontSize="20" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-
-                <Button x:Name="BtnReportIssues" Click="BtnReportIssues_Click" 
-                        Style="{StaticResource MaterialDesignFlatButton}"
-                        Height="50" HorizontalContentAlignment="Left" Foreground="White">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="ReportProblem" Margin="0,0,10,0"/>
-                        <TextBlock Text="Report an Issue"/>
-                    </StackPanel>
-                </Button>
-                <Button x:Name="BtnEvents" Click="BtnEvents_Click"
-                        Style="{StaticResource MaterialDesignFlatButton}"
-                        Height="50" HorizontalContentAlignment="Left" Foreground="White">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="CalendarClock" Margin="0,0,10,0"/>
-                        <TextBlock Text="Local Events"/>
-                    </StackPanel>
-                </Button>
-                <Button x:Name="BtnStatus" Click="BtnStatus_Click"
-                        Style="{StaticResource MaterialDesignFlatButton}"
-                        Height="50" HorizontalContentAlignment="Left" Foreground="White">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="ClipboardCheck" Margin="0,0,10,0"/>
-                        <TextBlock Text="Request Status"/>
-                    </StackPanel>
-                </Button>
+        <!-- Header -->
+        <Grid Grid.Row="1" Background="White" Margin="20,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Image Source="../Resources/zaCoatOfArms.ico" Height="60" Margin="0,0,20,0" Grid.Column="0"/>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="South African Government" FontSize="20" FontWeight="Bold" Foreground="{StaticResource SecondaryColor}"/>
+                <TextBlock Text="Municipal Services Platform" FontSize="16" Foreground="{StaticResource SecondaryColor}"/>
             </StackPanel>
-
-            <Button x:Name="BtnExit" Click="BtnExit_Click"
-                    Style="{StaticResource MaterialDesignFlatButton}"
-                    Height="50" VerticalAlignment="Bottom" Margin="0,0,0,20"
-                    Foreground="White">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="ExitToApp" Margin="0,0,10,0"/>
-                    <TextBlock Text="Exit"/>
-                </StackPanel>
-            </Button>
+            <Image Source="../Resources/zaFlag.ico" Height="40" Grid.Column="2" Margin="20,0,0,0"/>
         </Grid>
 
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Sidebar -->
+            <Grid Grid.Column="0" Background="{StaticResource PrimaryColor}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Margin="0,20,0,0">
+                    <TextBlock Text="Municipal Services" FontSize="20" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+                    <Button x:Name="BtnReportIssues" Click="BtnReportIssues_Click" 
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Height="50" HorizontalContentAlignment="Left" Foreground="White">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ReportProblem" Margin="0,0,10,0"/>
+                            <TextBlock Text="Report an Issue"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="BtnEvents" Click="BtnEvents_Click"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Height="50" HorizontalContentAlignment="Left" Foreground="White">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CalendarClock" Margin="0,0,10,0"/>
+                            <TextBlock Text="Local Events"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="BtnStatus" Click="BtnStatus_Click"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Height="50" HorizontalContentAlignment="Left" Foreground="White">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ClipboardCheck" Margin="0,0,10,0"/>
+                            <TextBlock Text="Request Status"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <Button x:Name="BtnExit" Click="BtnExit_Click"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Height="40" HorizontalContentAlignment="Center"
+                        Background="#E03C31"
+                        Grid.Row="2" VerticalAlignment="Bottom" Margin="0,0,0,0">
+                    <TextBlock Text="Exit" Foreground="White"/>
+                </Button>
+            </Grid>
+
         <!-- Main Content -->
-        <Grid Grid.Row="1" Grid.Column="1" Background="{StaticResource BackgroundGradient}">
+        <Grid Grid.Column="1" Background="{StaticResource BackgroundGradient}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0" Margin="20">
-                <TextBlock Text="Welcome to the Municipal Services Platform" 
-                           FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryColor}"/>
-                <TextBlock Text="Reported Issues" FontSize="20" Foreground="{StaticResource SecondaryColor}" Margin="0,10,0,0"/>
-                <TextBox materialDesign:HintAssist.Hint="Search issues..." Margin="0,10,0,0"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                <TextBlock Text="Reported Issues" FontSize="20" Foreground="{StaticResource PrimaryColor}" Margin="0,0,0,0"/>
+                <TextBox x:Name="SearchBox" materialDesign:HintAssist.Hint="Search issues..." Margin="0,10,0,0"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         TextChanged="SearchBox_TextChanged"
+                         Background="White"/>
             </StackPanel>
 
             <ScrollViewer Grid.Row="1" Margin="20,0,20,20">
@@ -125,11 +159,33 @@
                                         <TextBlock Text="{Binding Category}" Foreground="{StaticResource SecondaryColor}"/>
                                         <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,10,0,0"/>
                                     </StackPanel>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <Button Content="View Attachments" Click="ViewAttachment_Click"
-                                                Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                                        <TextBlock Text="Attachments:" FontWeight="Bold" Margin="0,0,0,5"/>
+                                        <ItemsControl ItemsSource="{Binding Attachments}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,0,0,5">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding Name}" Grid.Column="0" 
+                                                                   TextTrimming="CharacterEllipsis" 
+                                                                   ToolTip="{Binding Name}"
+                                                                   VerticalAlignment="Center"/>
+                                                        <Button Content="View" 
+                                                                Click="ViewAttachment_Click"
+                                                                CommandParameter="{Binding}"
+                                                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                                Grid.Column="1"
+                                                                Margin="10,0,0,0"
+                                                                MinWidth="60"/>
+                                                        </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                     </StackPanel>
-                                </Grid>
+                                    </Grid>
                             </materialDesign:Card>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
@@ -137,4 +193,5 @@
             </ScrollViewer>
         </Grid>
     </Grid>
+</Grid>
 </Window>
