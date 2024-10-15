@@ -57,10 +57,12 @@ namespace MunicipalServicesApplication.Services
                             try
                             {
                                 var titleNode = eventNode.SelectSingleNode(".//h4[@class='mec-event-title']/a");
-                                var dateNode = eventNode.SelectSingleNode(".//span[@class='mec-event-date']");
+                                var dateNode = eventNode.SelectSingleNode(".//div[contains(@class, 'mec-event-date')]");
                                 var eventUrl = titleNode?.GetAttributeValue("href", "");
                                 var categoryNode = eventNode.SelectSingleNode(".//span[@class='mec-category']");
                                 var imageNode = eventNode.SelectSingleNode(".//img[contains(@class, 'attachment-full') and contains(@class, 'size-full')]");
+
+                                
 
                                 if (!string.IsNullOrEmpty(eventUrl))
                                 {
@@ -68,6 +70,8 @@ namespace MunicipalServicesApplication.Services
                                     title = title.Replace("&#038;", "&")
                                         .Replace("&#8217;", "'");
                                     var eventDate = dateNode?.InnerText.Trim() ?? DateTime.Now.ToString("MMMM d, yyyy");
+                                    Debug.WriteLine("Date: " + eventDate);
+                                    var (parsedDate, originalDateString) = ParseDate(eventDate);
                                     var imageUrl = imageNode?.GetAttributeValue("data-lazy-src", "") ??
                                                    imageNode?.GetAttributeValue("src", "") ??
                                                    imageNode?.GetAttributeValue("data-src", "");
@@ -88,7 +92,8 @@ namespace MunicipalServicesApplication.Services
                                         var localEvent = new LocalEvent
                                         {
                                             Title = title,
-                                            Date = ParseDate(eventDate),
+                                            Date = parsedDate,
+                                            DateString = originalDateString, // Store the original date string
                                             Description = description,
                                             Category = category,
                                             ImageUrl = imageUrl,
@@ -159,7 +164,9 @@ namespace MunicipalServicesApplication.Services
                         description = description.Replace("&#8217;", "'")
                             .Replace("&#8230;", "...")
                             .Replace("&nbsp;", " ")
-                            .Replace("&amp;", "&");
+                            .Replace("&amp;", "&")
+                            .Replace("&#8216;", "'")
+                            .Replace("&#8211;", "-");
 
                         return description.Trim();
                     }
@@ -174,48 +181,34 @@ namespace MunicipalServicesApplication.Services
             }
         }
 
-        private string DetermineCategory(string title, string description)
+        private (DateTime, string) ParseDate(string dateString)
         {
-            var combinedText = (title + " " + description).ToLower();
-            if (combinedText.Contains("sport") || combinedText.Contains("cricket") || combinedText.Contains("rugby") || combinedText.Contains("football"))
-            {
-                return "Sport";
-            }
-            if (combinedText.Contains("music") || combinedText.Contains("concert") || combinedText.Contains("festival"))
-            {
-                return "Music";
-            }
-            if (combinedText.Contains("art") || combinedText.Contains("exhibition") || combinedText.Contains("gallery"))
-            {
-                return "Art";
-            }
-            if (combinedText.Contains("food") || combinedText.Contains("culinary") || combinedText.Contains("wine"))
-            {
-                return "Food & Drink";
-            }
-            if (combinedText.Contains("tech") || combinedText.Contains("technology") || combinedText.Contains("conference"))
-            {
-                return "Technology";
-            }
-            return "Uncategorized";
-        }
+            dateString = dateString.Trim();
+            string originalDateString = dateString; // Store the original string
 
-        private DateTime ParseDate(string dateString)
-        {
-            if (DateTime.TryParse(dateString, out DateTime result))
+            // Handle date ranges
+            if (dateString.Contains("-"))
             {
-                return result;
+                var parts = dateString.Split('-');
+                dateString = parts[0].Trim(); // Use the start date of the range
             }
 
-            // Try parsing custom formats
-            string[] formats = { "MMMM d, yyyy", "dd/MM/yyyy", "yyyy-MM-dd" };
-            if (DateTime.TryParseExact(dateString, formats, null, System.Globalization.DateTimeStyles.None, out result))
+            string[] formats = {
+                "d MMMM",
+                "dd MMMM",
+                "d MMM",
+                "dd MMM"
+            };
+
+            if (DateTime.TryParseExact(dateString, formats, null, System.Globalization.DateTimeStyles.None, out DateTime result))
             {
-                return result;
+                // If parsing succeeds, set the year to the current year
+                return (new DateTime(DateTime.Now.Year, result.Month, result.Day), originalDateString);
             }
 
-            // If all parsing attempts fail, return the current date
-            return DateTime.Now;
+            // If parsing fails, log the error and return the current date
+            Console.WriteLine($"Failed to parse date: {dateString}");
+            return (DateTime.Now, originalDateString);
         }
     }
 }

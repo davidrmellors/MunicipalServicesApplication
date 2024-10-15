@@ -123,7 +123,7 @@
                                             <TextBlock Text="{Binding Category}" FontWeight="Bold"/>
                                         </materialDesign:ColorZone>
                                         <TextBlock Grid.Row="1" Text="{Binding Title}" FontWeight="Bold" FontSize="18" TextWrapping="Wrap" Margin="16,16,16,8"/>
-                                        <TextBlock Grid.Row="2" Text="{Binding Date, StringFormat=d}" Margin="16,0,16,8" FontStyle="Italic"/>
+                                        <TextBlock Grid.Row="2" Text="{Binding DateString}" Margin="16,0,16,8" FontStyle="Italic"/>
                                         <TextBlock Grid.Row="3" Text="{Binding Description}" TextWrapping="Wrap" Margin="16,0,16,8" MaxHeight="120"/>
                                         <Button Grid.Row="4" Content="Read More" 
                                                 Style="{StaticResource MaterialDesignFlatButton}"
