@@ -24,9 +24,12 @@ C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplic
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Memory.dll
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Numerics.Vectors.dll
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Text.Encodings.Web.dll
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Text.Json.dll
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Threading.Tasks.Extensions.dll
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.ValueTuple.dll
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Diagnostics.DiagnosticSource.dll
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\Dapper.xml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\DotNetty.Common.xml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\HtmlAgilityPack.pdb
@@ -54,6 +57,8 @@ C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplic
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Memory.xml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Numerics.Vectors.xml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Text.Encodings.Web.xml
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Text.Json.xml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Threading.Tasks.Extensions.xml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.ValueTuple.xml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\MunicipalServicesApplication.csproj.AssemblyReference.cache

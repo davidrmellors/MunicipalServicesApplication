@@ -75,6 +75,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -96,8 +97,17 @@
             <Rectangle Grid.Column="5" Fill="#000000"/>
         </Grid>
 
+        <!-- Announcements Section -->
+        <Border Grid.Row="1" Background="#FFF4E5" Padding="10">
+            <ScrollViewer x:Name="AnnouncementsScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
+                <StackPanel x:Name="AnnouncementsStackPanel" Orientation="Horizontal">
+                    <!-- Announcements will be added here dynamically -->
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
         <!-- Header -->
-        <Grid Grid.Row="1" Background="White" Margin="20,10">
+        <Grid Grid.Row="2" Background="White" Margin="20,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -111,7 +121,7 @@
             <Image Source="../Resources/zaFlag.ico" Height="40" Grid.Column="2" Margin="20,0,0,0"/>
         </Grid>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
                 <ColumnDefinition Width="*"/>
@@ -171,7 +181,7 @@
             </Grid>
 
             <!-- Main Content -->
-            <Grid Grid.Column="1" Background="{StaticResource BackgroundGradient}">
+            <Grid Grid.Row="3" Grid.Column="1" Background="{StaticResource BackgroundGradient}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>

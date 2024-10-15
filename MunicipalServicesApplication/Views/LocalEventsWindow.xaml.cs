@@ -11,6 +11,7 @@ using MunicipalServicesApplication.Models;
 using MunicipalServicesApplication.Services;
 using System.Diagnostics;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace MunicipalServicesApplication.Views
 {
@@ -31,6 +32,10 @@ namespace MunicipalServicesApplication.Views
         private UserProfileService _userProfileService;
         private CurrentUser _currentUser;
         private List<LocalEvent> _recommendedEvents;
+
+        private AnnouncementService _announcementService;
+        private List<Announcement> _announcements;
+        private DispatcherTimer _announcementTimer;
 
         public List<LocalEvent> RecommendedEvents
         {
@@ -105,15 +110,93 @@ namespace MunicipalServicesApplication.Views
             upcomingEvents = new Queue<LocalEvent>();
             pastEvents = new Stack<LocalEvent>();
             OpenEventUrlCommand = new RelayCommand<string>(OpenEventUrl);
+            _announcementService = new AnnouncementService();
+            _announcements = new List<Announcement>();
             Loaded += LocalEventsWindow_Loaded;
         }
 
         private async void LocalEventsWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            await LoadAnnouncements();
+            StartAnnouncementAnimation();
             IsLoading = true;
             LoadingStatus = "Loading Events...";
             await _eventService.WaitForInitialLoadAsync();
             await LoadEvents();
+            
+        }
+
+        private async Task LoadAnnouncements()
+        {
+            _announcements = await _announcementService.GetAnnouncementsAsync();
+
+            foreach (var announcement in _announcements)
+            {
+                AddAnnouncementToUI(announcement);
+            }
+        }
+
+
+        private void AddAnnouncementToUI(Announcement announcement)
+        {
+            var textBlock = new TextBlock
+            {
+                Text = $"{announcement.Title} - {announcement.Date:d}",
+                TextWrapping = TextWrapping.NoWrap,
+                VerticalAlignment = VerticalAlignment.Center,
+                Padding = new Thickness(5),
+            };
+
+            var button = new Button
+            {
+                Content = textBlock,
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(1),
+                BorderBrush = Brushes.LightGray,
+                Cursor = Cursors.Hand,
+                Padding = new Thickness(5),
+                Margin = new Thickness(5)
+            };
+
+            button.Click += (sender, e) => OpenAnnouncementUrl(announcement.Url);
+
+            AnnouncementsStackPanel.Children.Add(button);
+        }
+
+        private void OpenAnnouncementUrl(string url)
+        {
+            if (!string.IsNullOrEmpty(url))
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+        }
+
+        private void StartAnnouncementAnimation()
+        {
+            _announcementTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(50)
+            };
+
+            _announcementTimer.Tick += (sender, e) =>
+            {
+                if (AnnouncementsScrollViewer.HorizontalOffset >= AnnouncementsStackPanel.ActualWidth)
+                {
+                    AnnouncementsScrollViewer.ScrollToHorizontalOffset(0);
+                }
+                else
+                {
+                    AnnouncementsScrollViewer.ScrollToHorizontalOffset(AnnouncementsScrollViewer.HorizontalOffset + 1);
+                }
+            };
+
+            _announcementTimer.Start();
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            _announcementTimer?.Stop();
         }
 
         private async Task LoadEvents()
