@@ -69,9 +69,7 @@ namespace MunicipalServicesApplication.Services
                                     var title = titleNode?.InnerText.Trim() ?? "No Title";
                                     title = title.Replace("&#038;", "&")
                                         .Replace("&#8217;", "'");
-                                    var eventDate = dateNode?.InnerText.Trim() ?? DateTime.Now.ToString("MMMM d, yyyy");
-                                    Debug.WriteLine("Date: " + eventDate);
-                                    var (parsedDate, originalDateString) = ParseDate(eventDate);
+                                    var (parsedDate, originalDateString) = await GetEventDateAsync(eventUrl);
                                     var imageUrl = imageNode?.GetAttributeValue("data-lazy-src", "") ??
                                                    imageNode?.GetAttributeValue("src", "") ??
                                                    imageNode?.GetAttributeValue("data-src", "");
@@ -181,32 +179,121 @@ namespace MunicipalServicesApplication.Services
             }
         }
 
+        private async Task<(DateTime, string)> GetEventDateAsync(string eventUrl)
+        {
+            try
+            {
+                var html = await _httpClient.GetStringAsync(eventUrl);
+                var htmlDocument = new HtmlDocument();
+                htmlDocument.LoadHtml(html);
+
+                var dateNode = htmlDocument.DocumentNode.SelectSingleNode("//div[contains(@class, 'mec-single-event-date')]") ??
+                               htmlDocument.DocumentNode.SelectSingleNode("//div[contains(@class, 'mec-event-date')]") ??
+                               htmlDocument.DocumentNode.SelectSingleNode("//div[contains(@class, 'mec-start-date-label')]");
+                if (dateNode != null)
+                {
+                    var startDateNode = dateNode.SelectSingleNode(".//span[contains(@class, 'mec-start-date-label')]") ??
+                                        dateNode.SelectSingleNode(".//span[contains(@class, 'mec-start-date')]") ??
+                                        dateNode;
+
+                    var endDateNode = dateNode.SelectSingleNode(".//span[contains(@class, 'mec-end-date-label')]") ??
+                                      dateNode.SelectSingleNode(".//span[contains(@class, 'mec-end-date')]");
+
+                    string dateString = startDateNode?.InnerText.Trim();
+                    if (endDateNode != null && !string.IsNullOrWhiteSpace(endDateNode.InnerText))
+                    {
+                        dateString += " " + endDateNode.InnerText.Trim();
+                    }
+
+                    if (!string.IsNullOrEmpty(dateString))
+                    {
+                        return ParseDate(dateString);
+                    }
+                }
+
+                var metaDate = htmlDocument.DocumentNode.SelectSingleNode("//meta[@property='event:start_date']/@content");
+                if (metaDate != null)
+                {
+                    var dateString = metaDate.GetAttributeValue("content", "");
+                    if (!string.IsNullOrEmpty(dateString))
+                    {
+                        return ParseDate(dateString);
+                    }
+                }
+
+                throw new Exception("Date information not found on the event page.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching event date for {eventUrl}: {ex.Message}");
+                return (DateTime.Now, "Date not available");
+            }
+        }
+
         private (DateTime, string) ParseDate(string dateString)
         {
             dateString = dateString.Trim();
-            string originalDateString = dateString; // Store the original string
-
-            // Handle date ranges
-            if (dateString.Contains("-"))
-            {
-                var parts = dateString.Split('-');
-                dateString = parts[0].Trim(); // Use the start date of the range
-            }
+            string originalDateString = dateString;
 
             string[] formats = {
-                "d MMMM",
-                "dd MMMM",
-                "d MMM",
-                "dd MMM"
+                "MMM dd yyyy",
+                "MMMM dd yyyy",
+                "MMM d yyyy",
+                "MMMM d yyyy",
+                "yyyy-MM-dd",  // ISO 8601 format
+                "dd MMMM yyyy",
+                "d MMMM yyyy",
+                "MMM dd",
+                "MMMM dd",
+                "MMM d",
+                "MMMM d"
             };
 
-            if (DateTime.TryParseExact(dateString, formats, null, System.Globalization.DateTimeStyles.None, out DateTime result))
+            // Handle date ranges with double dash
+            dateString = dateString.Replace(" - ", " – ");
+
+            // Handle date ranges
+            if (dateString.Contains("–"))
             {
-                // If parsing succeeds, set the year to the current year
-                return (new DateTime(DateTime.Now.Year, result.Month, result.Day), originalDateString);
+                var parts = dateString.Split('–');
+                string startDateString = parts[0].Trim();
+                string endDateString = parts[1].Trim();
+
+                // If the year is only present in the end date, add it to the start date
+                if (endDateString.Length > 4 && char.IsDigit(endDateString[endDateString.Length - 1]))
+                {
+                    string year = endDateString.Substring(endDateString.Length - 4);
+                    if (!startDateString.EndsWith(year))
+                    {
+                        startDateString += " " + year;
+                    }
+                }
+
+                // Try parsing with various formats
+                foreach (var format in formats)
+                {
+                    if (DateTime.TryParseExact(startDateString, format, null, System.Globalization.DateTimeStyles.None, out DateTime startDate))
+                    {
+                        return (startDate, originalDateString);
+                    }
+                }
             }
 
-            // If parsing fails, log the error and return the current date
+            // Try parsing the full date string with various formats
+            foreach (var format in formats)
+            {
+                if (DateTime.TryParseExact(dateString, format, null, System.Globalization.DateTimeStyles.None, out DateTime result))
+                {
+                    return (result, originalDateString);
+                }
+            }
+
+            // If all else fails, try a more lenient parsing
+            if (DateTime.TryParse(dateString, out DateTime lenientResult))
+            {
+                return (lenientResult, originalDateString);
+            }
+
             Console.WriteLine($"Failed to parse date: {dateString}");
             return (DateTime.Now, originalDateString);
         }
