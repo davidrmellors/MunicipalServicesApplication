@@ -6,7 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Threading.Tasks;
+using MunicipalServicesApplication.Models;
 
 namespace MunicipalServicesApplication
 {
@@ -15,6 +15,8 @@ namespace MunicipalServicesApplication
     /// </summary>
     public partial class App
     {
+        public static CurrentUser CurrentUser { get; set; }
+
         public EventService EventService { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)

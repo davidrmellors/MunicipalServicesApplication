@@ -28,6 +28,20 @@ namespace MunicipalServicesApplication.Views
         private Queue<LocalEvent> upcomingEvents;
         private Stack<LocalEvent> pastEvents;
 
+        private UserProfileService _userProfileService;
+        private CurrentUser _currentUser;
+        private List<LocalEvent> _recommendedEvents;
+
+        public List<LocalEvent> RecommendedEvents
+        {
+            get => _recommendedEvents;
+            set
+            {
+                _recommendedEvents = value;
+                OnPropertyChanged(nameof(RecommendedEvents));
+            }
+        }
+
         public ICommand OpenEventUrlCommand { get; private set; }
 
         public bool IsLoading
@@ -79,6 +93,8 @@ namespace MunicipalServicesApplication.Views
             InitializeComponent();
             DataContext = this;
             _eventService = ((App)Application.Current).EventService;
+            _userProfileService = new UserProfileService();
+            _currentUser = _userProfileService.GetOrCreateUser(App.CurrentUser.Id);
             _allEvents = new List<LocalEvent>();
             eventsByDate = new SortedDictionary<DateTime, List<LocalEvent>>();
             eventsByCategory = new Dictionary<string, HashSet<LocalEvent>>();
@@ -156,6 +172,23 @@ namespace MunicipalServicesApplication.Views
                 IsLoading = false;
                 LoadingStatus = string.Empty;
             }
+
+            RecommendedEvents = _eventService.GetRecommendedEvents(_currentUser, 5);
+            UpdateRecommendedEvents();
+        }
+
+        private void UpdateRecommendedEvents()
+        {
+            RecommendedEventsItemsControl.ItemsSource = null;
+            RecommendedEvents = _eventService.GetRecommendedEvents(_currentUser, 5);
+            RecommendedEventsItemsControl.ItemsSource = RecommendedEvents;
+            Console.WriteLine($"UpdateRecommendedEvents called. Count: {RecommendedEvents?.Count ?? 0}");
+            foreach (var evt in RecommendedEvents)
+            {
+                Console.WriteLine($"Event: {evt.Title}, {evt.DateString}, {evt.Category}");
+            }
+
+
         }
 
         private void AddEvent(LocalEvent evt)
@@ -260,23 +293,20 @@ namespace MunicipalServicesApplication.Views
             UpdateDisplayedEvents();
         }
 
-        private void OpenEventUrl(string url)
-        {
-            if (!string.IsNullOrEmpty(url))
-            {
-                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-            }
-        }
-
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             CurrentPage = 1;
+            _userProfileService.AddSearchQuery(_currentUser.Id, SearchBox.Text);
             UpdateDisplayedEvents();
         }
 
         private void CategoryFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             CurrentPage = 1;
+            if (CategoryFilter.SelectedItem is string selectedCategory)
+            {
+                _userProfileService.AddCategoryInteraction(_currentUser.Id, selectedCategory);
+            }
             UpdateDisplayedEvents();
         }
 
@@ -284,6 +314,19 @@ namespace MunicipalServicesApplication.Views
         {
             CurrentPage = 1;
             UpdateDisplayedEvents();
+        }
+
+        private void OpenEventUrl(string url)
+        {
+            if (!string.IsNullOrEmpty(url))
+            {
+                var selectedEvent = _allEvents.FirstOrDefault(e => e.Url == url);
+                if (selectedEvent != null)
+                {
+                    _userProfileService.AddViewedEvent(_currentUser.Id, selectedEvent.Id);
+                }
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
         }
 
         private void PreviousPageButton_Click(object sender, RoutedEventArgs e)

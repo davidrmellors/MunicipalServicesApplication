@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using HtmlAgilityPack;
 using MunicipalServicesApplication.Models;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace MunicipalServicesApplication.Services
 {
@@ -230,6 +231,59 @@ namespace MunicipalServicesApplication.Services
             }
         }
 
+        public List<LocalEvent> GetRecommendedEvents(CurrentUser user, int count)
+        {
+            var recommendedEvents = new List<LocalEvent>();
+
+            // Recommend based on category interactions
+            var preferredCategories = user.CategoryInteractions.OrderByDescending(kv => kv.Value).Select(kv => kv.Key).Take(3).ToList();
+            foreach (var category in preferredCategories)
+            {
+                var categoryEvents = _allEvents.Where(e => e.Category == category).Take(count / 2).ToList();
+                recommendedEvents.AddRange(categoryEvents);
+            }
+
+            // Ensure at least one event from each preferred category
+            foreach (var category in preferredCategories)
+            {
+                if (!recommendedEvents.Any(e => e.Category == category))
+                {
+                    var categoryEvent = _allEvents.FirstOrDefault(e => e.Category == category);
+                    if (categoryEvent != null)
+                    {
+                        recommendedEvents.Add(categoryEvent);
+                    }
+                }
+            }
+
+            // Recommend based on search history
+            var searchTerms = user.SearchHistory.Distinct().Reverse().Take(3).Reverse();
+            foreach (var term in searchTerms)
+            {
+                recommendedEvents.AddRange(_allEvents.Where(e => e.Title.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                                                 e.Description.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0)
+                    .Take(count / 5));
+            }
+
+            // Remove duplicates and events the user has already viewed
+            recommendedEvents = recommendedEvents.Distinct().Where(e => !user.ViewedEventIds.Contains(e.Id)).ToList();
+
+            // If we don't have enough recommendations, add some random events
+            if (recommendedEvents.Count < count)
+            {
+                var remainingCount = count - recommendedEvents.Count;
+                var randomEvents = _allEvents.Except(recommendedEvents).OrderBy(x => Guid.NewGuid()).Take(remainingCount);
+                recommendedEvents.AddRange(randomEvents);
+            }
+
+            Debug.WriteLine($"Preferred Categories: {string.Join(", ", preferredCategories)}");
+            Debug.WriteLine($"Search Terms: {string.Join(", ", searchTerms)}");
+            Debug.WriteLine($"Initial Recommendations Count: {recommendedEvents.Count}");
+            Debug.WriteLine($"Final Recommendations Count: {recommendedEvents.Take(count).Count()}");
+
+            return recommendedEvents.Take(count).ToList();
+        }
+
         private (DateTime, string) ParseDate(string dateString)
         {
             dateString = dateString.Trim();
@@ -294,7 +348,7 @@ namespace MunicipalServicesApplication.Services
                 return (lenientResult, originalDateString);
             }
 
-            Console.WriteLine($"Failed to parse date: {dateString}");
+            Debug.WriteLine($"Failed to parse date: {dateString}");
             return (DateTime.Now, originalDateString);
         }
     }

@@ -1,19 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MunicipalServicesApplication.Models
 {
-    public static class CurrentUser
+    public class CurrentUser
     {
-        public static string UserId { get; private set; }
-
-        public static void SetCurrentUser(string userId)
-        {
-            UserId = userId;
-        }
-
-        public static void ClearCurrentUser()
-        {
-            UserId = null;
-        }
+        public string Id { get; set; }
+        public List<string> SearchHistory { get; set; } = new List<string>();
+        public Dictionary<string, int> CategoryInteractions { get; set; } = new Dictionary<string, int>();
+        public List<string> ViewedEventIds { get; set; } = new List<string>();
     }
 }
