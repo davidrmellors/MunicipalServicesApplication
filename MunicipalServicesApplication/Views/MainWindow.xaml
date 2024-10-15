@@ -1,143 +1,164 @@
 ﻿<Window x:Class="MunicipalServicesApplication.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Main Menu" Height="600" Width="800"
-        WindowStartupLocation="CenterScreen" Background="#2c3e50"
-        Icon="../Resources/zaFlag.ico"
-        MinHeight="600" MinWidth="600">
-    <Grid Margin="20">
-        <!-- Define the layout grid -->
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Municipal Services Platform" Height="700" Width="1200"
+        WindowStartupLocation="CenterScreen" Background="White"
+        Icon="../Resources/zaCoatOfArms.ico" MinHeight="600" MinWidth="1000"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal" 
+        TextOptions.TextRenderingMode="Auto"
+        FontFamily="{DynamicResource MaterialDesignFont}">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="PrimaryColor" Color="#007A4D"/>
+        <SolidColorBrush x:Key="SecondaryColor" Color="#4A4A4A"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#003399"/>
+
+        <Style x:Key="SidebarListViewItemStyle" TargetType="ListViewItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E0E0E0"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#D0D0D0"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <!-- Title -->
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <!-- Buttons -->
-            <RowDefinition Height="*" />
-            <!-- DataGrid -->
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Main Title -->
-        <TextBlock Text="Municipal Services Platform" FontSize="28" FontWeight="Bold" Foreground="White"
-                   HorizontalAlignment="Center" Margin="0,10"/>
+        <!-- South African Flag Color Accent -->
+        <Grid Height="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Rectangle Grid.Column="0" Fill="#E03C31"/>
+            <Rectangle Grid.Column="1" Fill="#FFFFFF"/>
+            <Rectangle Grid.Column="2" Fill="#007A4D"/>
+            <Rectangle Grid.Column="3" Fill="#001489"/>
+            <Rectangle Grid.Column="4" Fill="#FFB612"/>
+            <Rectangle Grid.Column="5" Fill="#000000"/>
+        </Grid>
 
-        <!-- StackPanel for buttons -->
-        <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center" Width="300" Grid.Row="1" Margin="0,20,0,20">
-            <!-- Report Issues Button -->
-            <Button x:Name="btnReportIssues" Content="Report an Issue" Click="btnReportIssues_Click" Margin="0,10"
-                    Background="#1abc9c" Foreground="White" Padding="10" FontWeight="Bold" Width="200" HorizontalAlignment="Center">
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="Background" Value="#1abc9c"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#16a085"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
+        <!-- Header -->
+        <Grid Grid.Row="1" Background="White" Margin="20,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Image Source="../Resources/zaCoatOfArms.ico" Height="60" Margin="0,0,20,0" Grid.Column="0"/>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="South African Government" FontSize="20" FontWeight="Bold" Foreground="{StaticResource SecondaryColor}"/>
+                <TextBlock Text="Municipal Services Platform" FontSize="16" Foreground="{StaticResource SecondaryColor}"/>
+            </StackPanel>
+            <Image Source="../Resources/zaFlag.ico" Height="40" Grid.Column="2" Margin="20,0,0,0"/>
+        </Grid>
 
-            <!-- Local Events and Announcements Button (Disabled) -->
-            <Button x:Name="btnEvents" Content="Local Events and Announcements" IsEnabled="False" Margin="0,10"
-                    Background="#95a5a6" Foreground="LightGray" Padding="10" FontWeight="Bold" Width="200" HorizontalAlignment="Center"/>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <!-- Service Request Status Button (Disabled) -->
-            <Button x:Name="btnStatus" Content="Service Request Status" IsEnabled="False" Margin="0,10"
-                    Background="#95a5a6" Foreground="LightGray" Padding="10" FontWeight="Bold" Width="200" HorizontalAlignment="Center"/>
+            <!-- Sidebar -->
+            <Grid Grid.Column="0" Background="#F5F5F5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <!-- Exit Button -->
-            <Button x:Name="btnExit" Content="Exit" Click="btnExit_Click" Margin="0,30"
-                    Background="#e74c3c" Foreground="White" Padding="10" FontWeight="Bold" Width="200" HorizontalAlignment="Center">
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="Background" Value="#e74c3c"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#c0392b"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-        </StackPanel>
+                <StackPanel Grid.Row="0" Margin="0,20,0,0">
+                    <Button x:Name="BtnReportIssues" Click="BtnReportIssues_Click" 
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Height="40" HorizontalContentAlignment="Left">
+                        <TextBlock Text="Report an Issue" Foreground="{StaticResource SecondaryColor}"/>
+                    </Button>
+                    <Button x:Name="BtnEvents" Click="BtnEvents_Click"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Height="40" HorizontalContentAlignment="Left">
+                        <TextBlock Text="Local Events" Foreground="{StaticResource SecondaryColor}"/>
+                    </Button>
+                    <Button x:Name="BtnStatus" Click="BtnStatus_Click"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Height="40" HorizontalContentAlignment="Left">
+                        <TextBlock Text="Request Status" Foreground="{StaticResource SecondaryColor}"/>
+                    </Button>
+                </StackPanel>
 
-        <!-- Section Title for DataGrid -->
-        <TextBlock Text="Reported Issues" FontSize="18" FontWeight="SemiBold" Foreground="White"
-                   HorizontalAlignment="Left" Grid.Row="2" Margin="10,0,0,10"/>
+                <Button x:Name="BtnExit" Click="BtnExit_Click"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Height="40" HorizontalContentAlignment="Center"
+                        Background="#E03C31"
+                        Grid.Row="2" VerticalAlignment="Bottom" Margin="0,0,0,20">
+                    <TextBlock Text="Exit" Foreground="White"/>
+                </Button>
+            </Grid>
 
-        <!-- DataGrid for displaying reported issues -->
-        <DataGrid x:Name="IssuesDataGrid" AutoGenerateColumns="False" HeadersVisibility="Column"
-                  Background="#34495e" Foreground="White" CanUserAddRows="False" Grid.Row="2" Margin="10,40,10,10"
-                  ScrollViewer.VerticalScrollBarVisibility="Auto" ColumnWidth="*"
-                  BorderThickness="0" GridLinesVisibility="None" RowBackground="#2c3e50" AlternatingRowBackground="#34495e">
-            <!-- Style for DataGrid's column headers -->
-            <DataGrid.ColumnHeaderStyle>
-                <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="Background" Value="#1abc9c"/>
-                    <Setter Property="Foreground" Value="White"/>
-                    <Setter Property="FontWeight" Value="Bold"/>
-                    <Setter Property="BorderBrush" Value="#2c3e50"/>
-                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <!-- Main Content -->
+            <DockPanel Grid.Column="1" Margin="20,20,20,20">
+                <TextBlock Text="Welcome to the Municipal Services Platform" 
+                           FontSize="22" FontWeight="Bold" Foreground="{StaticResource PrimaryColor}"
+                           DockPanel.Dock="Top" Margin="0,0,0,20"/>
 
-                    <Setter Property="Padding" Value="5,0,0,0"/>
-                    <!-- Adds 10px left padding -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <!-- Optional: Align content to the left -->
-                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                </Style>
-            </DataGrid.ColumnHeaderStyle>
-
-            <!-- Style for DataGrid's rows -->
-            <DataGrid.RowStyle>
-                <Style TargetType="DataGridRow">
-                    <Setter Property="Foreground" Value="White"/>
-                    <Setter Property="FontWeight" Value="Normal"/>
-                    <Setter Property="BorderBrush" Value="#2c3e50"/>
-                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                    <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#16a085"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.RowStyle>
-
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="*"/>
-                <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="*"/>
-                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
-
-                <!-- Template column for displaying and clicking attachments -->
-                <DataGridTemplateColumn Header="Attachments" Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <ItemsControl ItemsSource="{Binding Attachments}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock>
-                                            <Hyperlink NavigateUri="{Binding}" RequestNavigate="Hyperlink_RequestNavigate">
-                                                <TextBlock Text="{Binding}" Foreground="#1abc9c"/>
-                                            </Hyperlink>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+                    <!-- DataGrid Section -->
+                    <materialDesign:Card Grid.Row="1" UniformCornerRadius="4" Margin="0,20,0,0">
+                        <DataGrid x:Name="IssuesDataGrid" AutoGenerateColumns="False"
+                                  materialDesign:DataGridAssist.CellPadding="13 8 8 8"
+                                  materialDesign:DataGridAssist.ColumnHeaderPadding="8"
+                                  CanUserAddRows="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="*"/>
+                                <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="*"/>
+                                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+                                <DataGridTemplateColumn Header="Attachments" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ItemsControl ItemsSource="{Binding Attachments}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button Content="View" 
+                                                                Click="ViewAttachment_Click"
+                                                                Tag="{Binding}"
+                                                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                                Margin="0,2"
+                                                                Foreground="{StaticResource PrimaryColor}"
+                                                                BorderBrush="{StaticResource PrimaryColor}"/>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </materialDesign:Card>
+                </Grid>
+            </DockPanel>
+        </Grid>
     </Grid>
-
-    <!-- Add a Fade-In Animation for the Window -->
-    <Window.Triggers>
-        <EventTrigger RoutedEvent="Window.Loaded">
-            <BeginStoryboard>
-                <Storyboard>
-                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1"/>
-                </Storyboard>
-            </BeginStoryboard>
-        </EventTrigger>
-    </Window.Triggers>
 </Window>
