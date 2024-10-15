@@ -123,11 +123,6 @@ namespace MunicipalServicesApplication.Views
             LoadingStatus = "Loading Events...";
             await _eventService.WaitForInitialLoadAsync();
             await LoadEvents();
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> dev
             
         }
 
@@ -154,15 +149,14 @@ namespace MunicipalServicesApplication.Views
                 Text = $"{announcement.Title} - {announcement.Date:d}",
                 TextWrapping = TextWrapping.NoWrap,
                 VerticalAlignment = VerticalAlignment.Center,
-<<<<<<< HEAD
+
                 Padding = new Thickness(5)
             };
             
-=======
+
                 Padding = new Thickness(5),
             };
 
->>>>>>> dev
             var button = new Button
             {
                 Content = textBlock,
@@ -170,10 +164,9 @@ namespace MunicipalServicesApplication.Views
                 BorderThickness = new Thickness(1),
                 BorderBrush = Brushes.LightGray,
                 Cursor = Cursors.Hand,
-<<<<<<< HEAD
-=======
+
                 Padding = new Thickness(5),
->>>>>>> dev
+
                 Margin = new Thickness(5)
             };
 
@@ -227,9 +220,7 @@ namespace MunicipalServicesApplication.Views
         {
             base.OnClosed(e);
             CompositionTarget.Rendering -= AnnouncementAnimation_Tick;
->>>>>>> Stashed changes
-=======
->>>>>>> dev
+
         }
 
         private async Task LoadEvents()
