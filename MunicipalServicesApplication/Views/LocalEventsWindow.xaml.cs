@@ -94,6 +94,88 @@ namespace MunicipalServicesApplication.Views
             LoadingStatus = "Loading Events...";
             await _eventService.WaitForInitialLoadAsync();
             await LoadEvents();
+<<<<<<< Updated upstream
+=======
+            
+        }
+
+        private async Task LoadAnnouncements()
+        {
+            _announcements = await _announcementService.GetAnnouncementsAsync();
+
+            foreach (var announcement in _announcements)
+            {
+                AddAnnouncementToUI(announcement);
+            }
+            // Duplicate announcements for seamless looping
+            foreach (var announcement in _announcements)
+            {
+                AddAnnouncementToUI(announcement);
+            }
+        }
+
+
+        private void AddAnnouncementToUI(Announcement announcement)
+        {
+            var textBlock = new TextBlock
+            {
+                Text = $"{announcement.Title} - {announcement.Date:d}",
+                TextWrapping = TextWrapping.NoWrap,
+                VerticalAlignment = VerticalAlignment.Center,
+                Padding = new Thickness(5)
+            };
+            
+            var button = new Button
+            {
+                Content = textBlock,
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(1),
+                BorderBrush = Brushes.LightGray,
+                Cursor = Cursors.Hand,
+                Margin = new Thickness(5)
+            };
+
+            button.Click += (sender, e) => OpenAnnouncementUrl(announcement.Url);
+
+            AnnouncementsStackPanel.Children.Add(button);
+        }
+
+        private void OpenAnnouncementUrl(string url)
+        {
+            if (!string.IsNullOrEmpty(url))
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+        }
+
+        private void StartAnnouncementAnimation()
+        {
+            CompositionTarget.Rendering += AnnouncementAnimation_Tick;
+        }
+
+        private void AnnouncementAnimation_Tick(object sender, EventArgs e)
+        {
+            if (AnnouncementsScrollViewer == null || AnnouncementsStackPanel == null) return;
+
+            double offset = AnnouncementsScrollViewer.HorizontalOffset;
+            double maxOffset = AnnouncementsStackPanel.ActualWidth / 2;
+
+            if (offset >= maxOffset)
+            {
+                AnnouncementsScrollViewer.ScrollToHorizontalOffset(0);
+            }
+            else
+            {
+                // Reduce the increment from 0.5 to 0.3 to slow down the animation
+                AnnouncementsScrollViewer.ScrollToHorizontalOffset(offset + 0.3);
+            }
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            CompositionTarget.Rendering -= AnnouncementAnimation_Tick;
+>>>>>>> Stashed changes
         }
 
         private async Task LoadEvents()
@@ -156,8 +238,16 @@ namespace MunicipalServicesApplication.Views
                 IsLoading = false;
                 LoadingStatus = string.Empty;
             }
+<<<<<<< Updated upstream
         }
 
+=======
+
+            RecommendedEvents = _eventService.GetRecommendedEvents(_currentUser, 5);
+        }
+
+
+>>>>>>> Stashed changes
         private void AddEvent(LocalEvent evt)
         {
             // Add to eventsByDate

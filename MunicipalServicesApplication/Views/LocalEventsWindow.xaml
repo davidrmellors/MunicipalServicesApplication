@@ -59,6 +59,16 @@
             <Rectangle Grid.Column="5" Fill="#000000"/>
         </Grid>
 
+<<<<<<< Updated upstream
+=======
+        <!-- Announcements Section -->
+        <Border Grid.Row="1" Background="#FFF4E5" Padding="10">
+            <ScrollViewer x:Name="AnnouncementsScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
+                <StackPanel x:Name="AnnouncementsStackPanel" Orientation="Horizontal"/>
+            </ScrollViewer>
+        </Border>
+
+>>>>>>> Stashed changes
         <!-- Header -->
         <Grid Grid.Row="1" Background="White" Margin="20,10">
             <Grid.ColumnDefinitions>
