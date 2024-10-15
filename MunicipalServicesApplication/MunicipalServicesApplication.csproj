@@ -153,6 +153,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\Attachment.cs" />
     <Compile Include="Models\CurrentUser.cs" />
     <Compile Include="Models\Issue.cs" />
     <Compile Include="Models\LocalEvent.cs" />
@@ -230,10 +231,7 @@
   <ItemGroup>
     <Resource Include="Resources\placeholderImage.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="x64\" />
-    <Folder Include="x86\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\MaterialDesignThemes.5.1.0\build\MaterialDesignThemes.targets" Condition="Exists('..\packages\MaterialDesignThemes.5.1.0\build\MaterialDesignThemes.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

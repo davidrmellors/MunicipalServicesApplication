@@ -8,6 +8,7 @@ namespace MunicipalServicesApplication.Models
 {
     public class LocalEvent
     {
+        public bool IsRecommended { get; set; }
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string Title { get; set; }
         public DateTime Date { get; set; }

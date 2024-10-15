@@ -13,7 +13,7 @@ namespace MunicipalServicesApplication.Views
         public MainWindow()
         {
             InitializeComponent();
-            IssuesDataGrid.ItemsSource = Issue.ReportedIssues;
+            IssuesItemsControl.ItemsSource = Issue.ReportedIssues;
         }
 
         private void BtnReportIssues_Click(object sender, RoutedEventArgs e)
@@ -25,7 +25,7 @@ namespace MunicipalServicesApplication.Views
             reportIssuesWindow.Closed += (s, args) =>
             {
                 this.Show(); // Show the MainWindow when ReportIssuesWindow is closed
-                IssuesDataGrid.Items.Refresh();
+                IssuesItemsControl.Items.Refresh();
             };
             reportIssuesWindow.Show();
         }

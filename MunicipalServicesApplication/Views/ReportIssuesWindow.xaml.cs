@@ -10,7 +10,7 @@ namespace MunicipalServicesApplication.Views
 {
     public partial class ReportIssuesWindow : Window
     {
-        private List<string> attachments = new List<string>();
+        private List<Attachment> attachments = new List<Attachment>();
 
         public ReportIssuesWindow()
         {
@@ -31,7 +31,7 @@ namespace MunicipalServicesApplication.Views
                     {
                         byte[] fileBytes = File.ReadAllBytes(filename);
                         string base64String = Convert.ToBase64String(fileBytes);
-                        attachments.Add(base64String);
+                        attachments.Add(new Attachment { Name = Path.GetFileName(filename), Content = base64String });
                     }
                     catch (Exception ex)
                     {
@@ -60,7 +60,7 @@ namespace MunicipalServicesApplication.Views
                 Location = TxtLocation.Text,
                 Category = (CmbCategory.SelectedItem as ComboBoxItem).Content.ToString(),
                 Description = TxtDescription.Text,
-                Attachments = new List<string>(attachments)
+                Attachments = new List<Attachment>(attachments)
             };
 
             Issue.ReportedIssues.Add(newIssue);

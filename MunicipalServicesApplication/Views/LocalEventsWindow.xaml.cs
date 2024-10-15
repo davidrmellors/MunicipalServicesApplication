@@ -86,7 +86,11 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
-        public int TotalPages => Math.Max((_allEvents?.Count ?? 0 + EventsPerPage - 1) / EventsPerPage, 1);
+        public int TotalPages
+        {
+            get => Math.Max((_allEvents?.Count ?? 0 + EventsPerPage - 1) / EventsPerPage, 1);
+            private set { } // Add a private setter to avoid the CS0200 error
+        }
 
         public LocalEventsWindow()
         {
@@ -174,22 +178,22 @@ namespace MunicipalServicesApplication.Views
             }
 
             RecommendedEvents = _eventService.GetRecommendedEvents(_currentUser, 5);
-            UpdateRecommendedEvents();
+            //UpdateRecommendedEvents();
         }
 
-        private void UpdateRecommendedEvents()
-        {
-            RecommendedEventsItemsControl.ItemsSource = null;
-            RecommendedEvents = _eventService.GetRecommendedEvents(_currentUser, 5);
-            RecommendedEventsItemsControl.ItemsSource = RecommendedEvents;
-            Console.WriteLine($"UpdateRecommendedEvents called. Count: {RecommendedEvents?.Count ?? 0}");
-            foreach (var evt in RecommendedEvents)
-            {
-                Console.WriteLine($"Event: {evt.Title}, {evt.DateString}, {evt.Category}");
-            }
+        //private void UpdateRecommendedEvents()
+        //{
+        //    RecommendedEventsItemsControl.ItemsSource = null;
+        //    RecommendedEvents = _eventService.GetRecommendedEvents(_currentUser, 5);
+        //    RecommendedEventsItemsControl.ItemsSource = RecommendedEvents;
+        //    Console.WriteLine($"UpdateRecommendedEvents called. Count: {RecommendedEvents?.Count ?? 0}");
+        //    foreach (var evt in RecommendedEvents)
+        //    {
+        //        Console.WriteLine($"Event: {evt.Title}, {evt.DateString}, {evt.Category}");
+        //    }
 
 
-        }
+        //}
 
         private void AddEvent(LocalEvent evt)
         {
@@ -226,25 +230,47 @@ namespace MunicipalServicesApplication.Views
 
         private void UpdateDisplayedEvents()
         {
-            var filteredEvents = ApplyFilters(_allEvents);
-            DisplayedEvents = filteredEvents
-                .Skip((CurrentPage - 1) * EventsPerPage)
-                .Take(EventsPerPage)
-                .ToList();
+            var filteredEvents = _allEvents;
 
-            if (DisplayedEvents.Count > 0)
+            // Apply category filter
+            if (CategoryFilter.SelectedItem is string selectedCategory && selectedCategory != "All Categories")
             {
-                EventsItemsControl.ItemsSource = null;
-                EventsItemsControl.ItemsSource = DisplayedEvents;
-            }
-            else
-            {
-                EventsItemsControl.ItemsSource = null;
+                filteredEvents = filteredEvents.Where(e => e.Category == selectedCategory).ToList();
             }
 
+            // Apply date filter
+            if (DateFilter.SelectedDate.HasValue)
+            {
+                var selectedDate = DateFilter.SelectedDate.Value.Date;
+                filteredEvents = filteredEvents.Where(e => e.Date.Date == selectedDate).ToList();
+            }
+
+            // Apply search filter
+            if (!string.IsNullOrWhiteSpace(SearchBox.Text))
+            {
+                var searchTerm = SearchBox.Text.ToLower();
+                filteredEvents = filteredEvents.Where(e =>
+                    e.Title.ToLower().Contains(searchTerm) ||
+                    e.Description.ToLower().Contains(searchTerm) ||
+                    e.Category.ToLower().Contains(searchTerm)
+                ).ToList();
+            }
+
+            // Get recommended events
+            var recommendedEvents = _eventService.GetRecommendedEvents(_currentUser, 5);
+            foreach (var evt in recommendedEvents)
+            {
+                evt.IsRecommended = true;
+            }
+
+            // Combine recommended and filtered events, ensuring recommended events appear first
+            var combinedEvents = recommendedEvents.Union(filteredEvents).ToList();
+
+            TotalPages = (int)Math.Ceiling(combinedEvents.Count / (double)EventsPerPage);
+            DisplayedEvents = combinedEvents.Skip((CurrentPage - 1) * EventsPerPage).Take(EventsPerPage).ToList();
+
+            OnPropertyChanged(nameof(DisplayedEvents));
             OnPropertyChanged(nameof(TotalPages));
-
-            Dispatcher.InvokeAsync(() => EventsScrollViewer.ScrollToTop(), System.Windows.Threading.DispatcherPriority.Render);
         }
 
         private IEnumerable<LocalEvent> ApplyFilters(IEnumerable<LocalEvent> events)
