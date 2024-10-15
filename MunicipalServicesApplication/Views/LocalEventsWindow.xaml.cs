@@ -134,6 +134,11 @@ namespace MunicipalServicesApplication.Views
             {
                 AddAnnouncementToUI(announcement);
             }
+            // Duplicate announcements for seamless looping
+            foreach (var announcement in _announcements)
+            {
+                AddAnnouncementToUI(announcement);
+            }
         }
 
 
@@ -173,30 +178,31 @@ namespace MunicipalServicesApplication.Views
 
         private void StartAnnouncementAnimation()
         {
-            _announcementTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(50)
-            };
-
-            _announcementTimer.Tick += (sender, e) =>
-            {
-                if (AnnouncementsScrollViewer.HorizontalOffset >= AnnouncementsStackPanel.ActualWidth)
-                {
-                    AnnouncementsScrollViewer.ScrollToHorizontalOffset(0);
-                }
-                else
-                {
-                    AnnouncementsScrollViewer.ScrollToHorizontalOffset(AnnouncementsScrollViewer.HorizontalOffset + 1);
-                }
-            };
-
-            _announcementTimer.Start();
+            CompositionTarget.Rendering += AnnouncementAnimation_Tick;
         }
 
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
-            _announcementTimer?.Stop();
+            CompositionTarget.Rendering -= AnnouncementAnimation_Tick;
+        }
+
+        private void AnnouncementAnimation_Tick(object sender, EventArgs e)
+        {
+            if (AnnouncementsScrollViewer == null || AnnouncementsStackPanel == null) return;
+
+            double offset = AnnouncementsScrollViewer.HorizontalOffset;
+            double maxOffset = AnnouncementsStackPanel.ActualWidth / 2;
+
+            if (offset >= maxOffset)
+            {
+                AnnouncementsScrollViewer.ScrollToHorizontalOffset(0);
+            }
+            else
+            {
+                // Reduce the increment from 0.5 to 0.3 to slow down the animation
+                AnnouncementsScrollViewer.ScrollToHorizontalOffset(offset + 0.3);
+            }
         }
 
         private async Task LoadEvents()
