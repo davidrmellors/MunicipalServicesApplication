@@ -23,6 +23,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- South African Flag Color Accent -->
@@ -60,7 +61,7 @@
 
         <!-- Main Content -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="40,20">
+            <StackPanel Margin="40,20,40, 0">
                 <TextBlock Text="Report an Issue" FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryColor}" Margin="0,0,0,20"/>
 
                 <TextBlock Text="Location" Foreground="{StaticResource SecondaryColor}" Margin="0,10,0,5"/>
@@ -90,7 +91,7 @@
                 <TextBox x:Name="TxtDescription" Text="Enter Description" Foreground="{StaticResource SecondaryColor}"
                          GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"
                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         TextWrapping="Wrap" AcceptsReturn="True" Height="100" Margin="0,0,0,15"/>
+                         TextWrapping="Wrap" AcceptsReturn="True" Height="50" Margin="0,0,0,15"/>
 
                 <TextBlock Text="Attachments" Foreground="{StaticResource SecondaryColor}" Margin="0,10,0,5"/>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
@@ -113,13 +114,14 @@
                         Background="{StaticResource PrimaryColor}"
                         Foreground="White"
                         Margin="0,0,0,15"/>
-
-                <Button Content="Back to Main Menu" Click="BackToMainMenu_Click"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Foreground="{StaticResource SecondaryColor}"
-                        BorderBrush="{StaticResource SecondaryColor}"
-                        Margin="0,0,0,15"/>
+               
             </StackPanel>
         </ScrollViewer>
+        <Button Grid.Row="3" Content="Back to Main Menu" Click="BackToMainMenu_Click"
+                Style="{StaticResource MaterialDesignOutlinedButton}"
+                Foreground="{StaticResource SecondaryColor}"
+                BorderBrush="{StaticResource SecondaryColor}"
+                Margin="40,15,40,20"
+                HorizontalAlignment="Stretch"/>
     </Grid>
 </Window>

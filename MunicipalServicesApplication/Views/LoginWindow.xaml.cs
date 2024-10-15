@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Input;
 using System.Data.SqlClient;
 using MunicipalServicesApplication.Models;
+using MunicipalServicesApplication.Services;
 
 namespace MunicipalServicesApplication.Views
 {
@@ -26,15 +27,15 @@ namespace MunicipalServicesApplication.Views
             if (IsValidSouthAfricanID(idNumber))
             {
                 HideError();
-                // If login is successful, open the main window and close the login window
+                var userProfileService = new UserProfileService();
+                App.CurrentUser = userProfileService.GetOrCreateUser(idNumber);
                 MainWindow mainWindow = new MainWindow();
                 mainWindow.Show();
                 this.Close();
-                CurrentUser.SetCurrentUser(idNumber);
             }
             else
             {
-                ShowError("Invalid South African ID number. Please check and try again.");
+                ShowError("Invalid South African ID number.");
             }
         }
 

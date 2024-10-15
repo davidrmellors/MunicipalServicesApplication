@@ -11,6 +11,7 @@ using MunicipalServicesApplication.Models;
 using MunicipalServicesApplication.Services;
 using System.Diagnostics;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace MunicipalServicesApplication.Views
 {
@@ -27,6 +28,24 @@ namespace MunicipalServicesApplication.Views
         private Dictionary<string, HashSet<LocalEvent>> eventsByCategory;
         private Queue<LocalEvent> upcomingEvents;
         private Stack<LocalEvent> pastEvents;
+
+        private UserProfileService _userProfileService;
+        private CurrentUser _currentUser;
+        private List<LocalEvent> _recommendedEvents;
+
+        private AnnouncementService _announcementService;
+        private List<Announcement> _announcements;
+        private DispatcherTimer _announcementTimer;
+
+        public List<LocalEvent> RecommendedEvents
+        {
+            get => _recommendedEvents;
+            set
+            {
+                _recommendedEvents = value;
+                OnPropertyChanged(nameof(RecommendedEvents));
+            }
+        }
 
         public ICommand OpenEventUrlCommand { get; private set; }
 
@@ -72,30 +91,43 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
-        public int TotalPages => Math.Max((_allEvents?.Count ?? 0 + EventsPerPage - 1) / EventsPerPage, 1);
+        public int TotalPages
+        {
+            get => Math.Max((_allEvents?.Count ?? 0 + EventsPerPage - 1) / EventsPerPage, 1);
+            private set { } // Add a private setter to avoid the CS0200 error
+        }
 
         public LocalEventsWindow()
         {
             InitializeComponent();
             DataContext = this;
             _eventService = ((App)Application.Current).EventService;
+            _userProfileService = new UserProfileService();
+            _currentUser = _userProfileService.GetOrCreateUser(App.CurrentUser.Id);
             _allEvents = new List<LocalEvent>();
             eventsByDate = new SortedDictionary<DateTime, List<LocalEvent>>();
             eventsByCategory = new Dictionary<string, HashSet<LocalEvent>>();
             upcomingEvents = new Queue<LocalEvent>();
             pastEvents = new Stack<LocalEvent>();
             OpenEventUrlCommand = new RelayCommand<string>(OpenEventUrl);
+            _announcementService = new AnnouncementService();
+            _announcements = new List<Announcement>();
             Loaded += LocalEventsWindow_Loaded;
         }
 
         private async void LocalEventsWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            await LoadAnnouncements();
+            StartAnnouncementAnimation();
             IsLoading = true;
             LoadingStatus = "Loading Events...";
             await _eventService.WaitForInitialLoadAsync();
             await LoadEvents();
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
+=======
+>>>>>>> dev
             
         }
 
@@ -122,9 +154,15 @@ namespace MunicipalServicesApplication.Views
                 Text = $"{announcement.Title} - {announcement.Date:d}",
                 TextWrapping = TextWrapping.NoWrap,
                 VerticalAlignment = VerticalAlignment.Center,
+<<<<<<< HEAD
                 Padding = new Thickness(5)
             };
             
+=======
+                Padding = new Thickness(5),
+            };
+
+>>>>>>> dev
             var button = new Button
             {
                 Content = textBlock,
@@ -132,6 +170,10 @@ namespace MunicipalServicesApplication.Views
                 BorderThickness = new Thickness(1),
                 BorderBrush = Brushes.LightGray,
                 Cursor = Cursors.Hand,
+<<<<<<< HEAD
+=======
+                Padding = new Thickness(5),
+>>>>>>> dev
                 Margin = new Thickness(5)
             };
 
@@ -153,6 +195,15 @@ namespace MunicipalServicesApplication.Views
             CompositionTarget.Rendering += AnnouncementAnimation_Tick;
         }
 
+<<<<<<< HEAD
+=======
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            CompositionTarget.Rendering -= AnnouncementAnimation_Tick;
+        }
+
+>>>>>>> dev
         private void AnnouncementAnimation_Tick(object sender, EventArgs e)
         {
             if (AnnouncementsScrollViewer == null || AnnouncementsStackPanel == null) return;
@@ -169,6 +220,7 @@ namespace MunicipalServicesApplication.Views
                 // Reduce the increment from 0.5 to 0.3 to slow down the animation
                 AnnouncementsScrollViewer.ScrollToHorizontalOffset(offset + 0.3);
             }
+<<<<<<< HEAD
         }
 
         protected override void OnClosed(EventArgs e)
@@ -176,6 +228,8 @@ namespace MunicipalServicesApplication.Views
             base.OnClosed(e);
             CompositionTarget.Rendering -= AnnouncementAnimation_Tick;
 >>>>>>> Stashed changes
+=======
+>>>>>>> dev
         }
 
         private async Task LoadEvents()
@@ -238,6 +292,7 @@ namespace MunicipalServicesApplication.Views
                 IsLoading = false;
                 LoadingStatus = string.Empty;
             }
+<<<<<<< HEAD
 <<<<<<< Updated upstream
         }
 
@@ -248,6 +303,27 @@ namespace MunicipalServicesApplication.Views
 
 
 >>>>>>> Stashed changes
+=======
+
+            RecommendedEvents = _eventService.GetRecommendedEvents(_currentUser, 5);
+            //UpdateRecommendedEvents();
+        }
+
+        //private void UpdateRecommendedEvents()
+        //{
+        //    RecommendedEventsItemsControl.ItemsSource = null;
+        //    RecommendedEvents = _eventService.GetRecommendedEvents(_currentUser, 5);
+        //    RecommendedEventsItemsControl.ItemsSource = RecommendedEvents;
+        //    Console.WriteLine($"UpdateRecommendedEvents called. Count: {RecommendedEvents?.Count ?? 0}");
+        //    foreach (var evt in RecommendedEvents)
+        //    {
+        //        Console.WriteLine($"Event: {evt.Title}, {evt.DateString}, {evt.Category}");
+        //    }
+
+
+        //}
+
+>>>>>>> dev
         private void AddEvent(LocalEvent evt)
         {
             // Add to eventsByDate
@@ -283,25 +359,47 @@ namespace MunicipalServicesApplication.Views
 
         private void UpdateDisplayedEvents()
         {
-            var filteredEvents = ApplyFilters(_allEvents);
-            DisplayedEvents = filteredEvents
-                .Skip((CurrentPage - 1) * EventsPerPage)
-                .Take(EventsPerPage)
-                .ToList();
+            var filteredEvents = _allEvents;
 
-            if (DisplayedEvents.Count > 0)
+            // Apply category filter
+            if (CategoryFilter.SelectedItem is string selectedCategory && selectedCategory != "All Categories")
             {
-                EventsItemsControl.ItemsSource = null;
-                EventsItemsControl.ItemsSource = DisplayedEvents;
-            }
-            else
-            {
-                EventsItemsControl.ItemsSource = null;
+                filteredEvents = filteredEvents.Where(e => e.Category == selectedCategory).ToList();
             }
 
+            // Apply date filter
+            if (DateFilter.SelectedDate.HasValue)
+            {
+                var selectedDate = DateFilter.SelectedDate.Value.Date;
+                filteredEvents = filteredEvents.Where(e => e.Date.Date == selectedDate).ToList();
+            }
+
+            // Apply search filter
+            if (!string.IsNullOrWhiteSpace(SearchBox.Text))
+            {
+                var searchTerm = SearchBox.Text.ToLower();
+                filteredEvents = filteredEvents.Where(e =>
+                    e.Title.ToLower().Contains(searchTerm) ||
+                    e.Description.ToLower().Contains(searchTerm) ||
+                    e.Category.ToLower().Contains(searchTerm)
+                ).ToList();
+            }
+
+            // Get recommended events
+            var recommendedEvents = _eventService.GetRecommendedEvents(_currentUser, 5);
+            foreach (var evt in recommendedEvents)
+            {
+                evt.IsRecommended = true;
+            }
+
+            // Combine recommended and filtered events, ensuring recommended events appear first
+            var combinedEvents = recommendedEvents.Union(filteredEvents).ToList();
+
+            TotalPages = (int)Math.Ceiling(combinedEvents.Count / (double)EventsPerPage);
+            DisplayedEvents = combinedEvents.Skip((CurrentPage - 1) * EventsPerPage).Take(EventsPerPage).ToList();
+
+            OnPropertyChanged(nameof(DisplayedEvents));
             OnPropertyChanged(nameof(TotalPages));
-
-            Dispatcher.InvokeAsync(() => EventsScrollViewer.ScrollToTop(), System.Windows.Threading.DispatcherPriority.Render);
         }
 
         private IEnumerable<LocalEvent> ApplyFilters(IEnumerable<LocalEvent> events)
@@ -350,23 +448,20 @@ namespace MunicipalServicesApplication.Views
             UpdateDisplayedEvents();
         }
 
-        private void OpenEventUrl(string url)
-        {
-            if (!string.IsNullOrEmpty(url))
-            {
-                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-            }
-        }
-
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             CurrentPage = 1;
+            _userProfileService.AddSearchQuery(_currentUser.Id, SearchBox.Text);
             UpdateDisplayedEvents();
         }
 
         private void CategoryFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             CurrentPage = 1;
+            if (CategoryFilter.SelectedItem is string selectedCategory)
+            {
+                _userProfileService.AddCategoryInteraction(_currentUser.Id, selectedCategory);
+            }
             UpdateDisplayedEvents();
         }
 
@@ -374,6 +469,19 @@ namespace MunicipalServicesApplication.Views
         {
             CurrentPage = 1;
             UpdateDisplayedEvents();
+        }
+
+        private void OpenEventUrl(string url)
+        {
+            if (!string.IsNullOrEmpty(url))
+            {
+                var selectedEvent = _allEvents.FirstOrDefault(e => e.Url == url);
+                if (selectedEvent != null)
+                {
+                    _userProfileService.AddViewedEvent(_currentUser.Id, selectedEvent.Id);
+                }
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
         }
 
         private void PreviousPageButton_Click(object sender, RoutedEventArgs e)
