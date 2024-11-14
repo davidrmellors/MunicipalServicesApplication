@@ -8,9 +8,10 @@ using MunicipalServices.Models;
 
 namespace MunicipalServicesApplication.Views
 {
-    public partial class ReportIssuesWindow : Window
+    public partial class ReportIssuesWindow : UserControl
     {
         private List<Attachment> attachments = new List<Attachment>();
+        public event EventHandler BackToMainRequested;
 
         public ReportIssuesWindow()
         {
@@ -65,7 +66,6 @@ namespace MunicipalServicesApplication.Views
 
             Issue.ReportedIssues.Add(newIssue);
             MessageBox.Show("Issue reported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            this.Close();
         }
 
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -88,7 +88,7 @@ namespace MunicipalServicesApplication.Views
 
         private void BackToMainMenu_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            BackToMainRequested?.Invoke(this, EventArgs.Empty);
         }
     }
 }

@@ -1,11 +1,8 @@
-﻿<Window x:Class="MunicipalServicesApplication.Views.LocalEventsWindow"
+﻿<UserControl x:Class="MunicipalServicesApplication.Views.LocalEventsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
         xmlns:services="clr-namespace:MunicipalServices.Core.Services;assembly=MunicipalServices.Core"
-        Title="Local Events and Announcements" Height="700" Width="1200"
-        WindowStartupLocation="CenterScreen" Background="White"
-        Icon="../Resources/zaCoatOfArms.ico" MinHeight="600" MinWidth="1000"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
@@ -14,7 +11,7 @@
         FontFamily="{DynamicResource MaterialDesignFont}"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
 
-    <Window.Resources>
+    <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
         <SolidColorBrush x:Key="PrimaryColor" Color="#007A4D"/>
         <SolidColorBrush x:Key="SecondaryColor" Color="#4A4A4A"/>
@@ -69,7 +66,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-    </Window.Resources>
+    </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -253,4 +250,4 @@
             </Grid>
         </Grid>
     </Grid>
-</Window>
+</UserControl>

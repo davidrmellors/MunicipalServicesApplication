@@ -15,7 +15,7 @@ using MunicipalServices.Models;
 
 namespace MunicipalServicesApplication.Views
 {
-    public partial class LocalEventsWindow : Window, INotifyPropertyChanged
+    public partial class LocalEventsWindow : UserControl, INotifyPropertyChanged
     {
         private EventService _eventService;
         private List<LocalEvent> _allEvents;
@@ -36,6 +36,8 @@ namespace MunicipalServicesApplication.Views
         private AnnouncementService _announcementService;
         private List<Announcement> _announcements;
         private DispatcherTimer _announcementTimer;
+
+        public event EventHandler BackToMainRequested;
 
         public List<LocalEvent> RecommendedEvents
         {
@@ -181,11 +183,6 @@ namespace MunicipalServicesApplication.Views
             CompositionTarget.Rendering += AnnouncementAnimation_Tick;
         }
 
-        protected override void OnClosed(EventArgs e)
-        {
-            base.OnClosed(e);
-            CompositionTarget.Rendering -= AnnouncementAnimation_Tick;
-        }
 
         private void AnnouncementAnimation_Tick(object sender, EventArgs e)
         {
@@ -466,7 +463,7 @@ namespace MunicipalServicesApplication.Views
 
         private void BackToMainMenu_Click(object sender, RoutedEventArgs e)
         {
-            this.Close(); // This will close the LocalEventsWindow and return to the MainWindow
+            BackToMainRequested?.Invoke(this, EventArgs.Empty);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

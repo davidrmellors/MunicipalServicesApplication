@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 using System.Data.SqlClient;
+using System.Windows.Controls;
 using MunicipalServices.Models;
 using MunicipalServices.Core.Services;
 
@@ -31,7 +32,6 @@ namespace MunicipalServicesApplication.Views
                 App.CurrentUser = userProfileService.GetOrCreateUser(idNumber);
                 MainWindow mainWindow = new MainWindow();
                 mainWindow.Show();
-                this.Close();
             }
             else
             {
@@ -41,7 +41,6 @@ namespace MunicipalServicesApplication.Views
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
         }
 
         private bool IsValidSouthAfricanID(string idNumber)
@@ -72,11 +71,5 @@ namespace MunicipalServicesApplication.Views
             LblError.Visibility = Visibility.Collapsed;
         }
 
-        // Allow dragging the window
-        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
-        {
-            base.OnMouseLeftButtonDown(e);
-            this.DragMove();
-        }
     }
 }
