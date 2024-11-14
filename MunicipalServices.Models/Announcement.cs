@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MunicipalServicesApplication.Models
+namespace MunicipalServices.Models
 {
     public class Announcement
     {

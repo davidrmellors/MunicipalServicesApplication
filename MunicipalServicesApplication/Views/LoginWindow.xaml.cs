@@ -2,8 +2,8 @@
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 using System.Data.SqlClient;
-using MunicipalServicesApplication.Models;
-using MunicipalServicesApplication.Services;
+using MunicipalServices.Models;
+using MunicipalServices.Core.Services;
 
 namespace MunicipalServicesApplication.Views
 {

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Globalization;
-using System.Windows.Data;
+using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Data;
 
-namespace MunicipalServicesApplication.Services
+namespace MunicipalServices.Core.Services
 {
     public class SvgToImageSourceConverter : IValueConverter
     {

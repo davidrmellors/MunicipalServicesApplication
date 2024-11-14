@@ -5,11 +5,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
-using MunicipalServicesApplication.Models;
-using Newtonsoft.Json;
-using System.Linq;
+using MunicipalServices.Models;
 
-namespace MunicipalServicesApplication.Services
+namespace MunicipalServices.Core.Services
 {
     public class EventService
     {

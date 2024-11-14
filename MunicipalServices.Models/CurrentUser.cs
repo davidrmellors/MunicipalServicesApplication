@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MunicipalServicesApplication.Models
+namespace MunicipalServices.Models
 {
     public class CurrentUser
     {

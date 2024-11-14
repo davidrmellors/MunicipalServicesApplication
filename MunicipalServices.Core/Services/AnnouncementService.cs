@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MunicipalServicesApplication.Models;
+using MunicipalServices.Models;
 
-namespace MunicipalServicesApplication.Services
+namespace MunicipalServices.Core.Services
 {
     public class AnnouncementService
     {

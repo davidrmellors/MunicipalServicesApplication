@@ -7,11 +7,11 @@ using System.Windows.Input;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using MunicipalServicesApplication.Models;
-using MunicipalServicesApplication.Services;
 using System.Diagnostics;
 using System.Windows.Media;
 using System.Windows.Threading;
+using MunicipalServices.Core.Services;
+using MunicipalServices.Models;
 
 namespace MunicipalServicesApplication.Views
 {

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 using Dapper;
-using MunicipalServicesApplication.Models;
+using MunicipalServices.Models;
 using Newtonsoft.Json;
 
-namespace MunicipalServicesApplication.Services
+namespace MunicipalServices.Core.Services
 {
     public class UserProfileService
     {

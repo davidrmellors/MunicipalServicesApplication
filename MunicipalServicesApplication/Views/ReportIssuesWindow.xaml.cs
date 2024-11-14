@@ -4,7 +4,7 @@ using System.IO;
 using System.Windows;
 using Microsoft.Win32;
 using System.Windows.Controls;
-using MunicipalServicesApplication.Models;
+using MunicipalServices.Models;
 
 namespace MunicipalServicesApplication.Views
 {
