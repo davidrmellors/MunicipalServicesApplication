@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using MunicipalServices.Models;
 using MunicipalServices.Core.Services;
 
 namespace MunicipalServicesApplication.Views
@@ -34,6 +33,9 @@ namespace MunicipalServicesApplication.Views
                     _dashboardView.RefreshIssues();
                     SwitchView(_dashboardView);
                     break;
+                case "Status":
+                    SwitchView(new ServiceRequestStatusView());
+                    break;
             }
         }
 
@@ -49,6 +51,10 @@ namespace MunicipalServicesApplication.Views
                 else if (newView is ReportIssuesWindow reportWindow)
                 {
                     reportWindow.BackToMainRequested += (s, e) => SwitchView(_dashboardView);
+                }
+                else if (newView is ServiceRequestStatusView statusWindow)
+                {
+                    statusWindow.BackToMainRequested += (s, e) => SwitchView(_dashboardView);
                 }
             }
 

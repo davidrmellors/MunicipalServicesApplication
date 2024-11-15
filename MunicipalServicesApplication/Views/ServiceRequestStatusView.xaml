@@ -1,0 +1,147 @@
+﻿<UserControl x:Class="MunicipalServicesApplication.Views.ServiceRequestStatusView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal" 
+        TextOptions.TextRenderingMode="Auto"
+        FontFamily="{DynamicResource MaterialDesignFont}">
+
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="PrimaryColor" Color="#007A4D"/>
+        <SolidColorBrush x:Key="SecondaryColor" Color="#4A4A4A"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#003399"/>
+
+        <LinearGradientBrush x:Key="BackgroundGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#F0F0F0" Offset="0"/>
+            <GradientStop Color="#E0E0E0" Offset="1"/>
+        </LinearGradientBrush>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource BackgroundGradient}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- South African Flag Color Accent -->
+        <Grid Height="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Rectangle Grid.Column="0" Fill="#E03C31"/>
+            <Rectangle Grid.Column="1" Fill="#FFFFFF"/>
+            <Rectangle Grid.Column="2" Fill="#007A4D"/>
+            <Rectangle Grid.Column="3" Fill="#001489"/>
+            <Rectangle Grid.Column="4" Fill="#FFB612"/>
+            <Rectangle Grid.Column="5" Fill="#000000"/>
+        </Grid>
+
+        <!-- Header -->
+        <Grid Grid.Row="1" Background="White" Margin="20,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Image Source="../Resources/zaCoatOfArms.ico" Height="60" Margin="0,0,20,0"/>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="Service Request Status" FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryColor}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Search Section -->
+        <materialDesign:Card Grid.Row="2" Margin="20" UniformCornerRadius="8">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="16">
+                    <TextBox x:Name="SearchRequestId"
+                            materialDesign:HintAssist.Hint="Search by Request ID"
+                            Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                            Margin="0,0,0,16"/>
+
+                    <ItemsControl x:Name="RequestsItemsControl">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <materialDesign:Card Margin="0,0,0,16" UniformCornerRadius="8">
+                                    <Grid Margin="16">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Header -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Category}" 
+                             FontSize="18" 
+                             FontWeight="Bold"
+                             Foreground="{StaticResource PrimaryColor}"/>
+                                                <TextBlock Text="{Binding Location}"
+                             FontSize="14"
+                             Foreground="{StaticResource SecondaryColor}"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Description -->
+                                        <TextBlock Grid.Row="1" 
+                      Text="{Binding Description}"
+                      TextWrapping="Wrap"
+                      Margin="0,16,0,0"/>
+
+                                        <!-- Attachments -->
+                                        <ItemsControl Grid.Row="2" 
+                         ItemsSource="{Binding Attachments}"
+                         Margin="0,16,0,0">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Margin="0,0,8,8"
+                                Click="ViewAttachment_Click">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <materialDesign:PackIcon Kind="Attachment" Margin="0,0,8,0"/>
+                                                            <TextBlock Text="{Binding Name}"/>
+                                                        </StackPanel>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Grid>
+                                </materialDesign:Card>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+        </materialDesign:Card>
+
+        <!-- Back Button -->
+        <Button Grid.Row="3" 
+                Content="Back to Main Menu" 
+                Click="BackToMain_Click"
+                Style="{StaticResource MaterialDesignOutlinedButton}"
+                Foreground="{StaticResource SecondaryColor}"
+                BorderBrush="{StaticResource SecondaryColor}"
+                Margin="20,0,20,20"
+                HorizontalAlignment="Stretch"/>
+    </Grid>
+</UserControl>

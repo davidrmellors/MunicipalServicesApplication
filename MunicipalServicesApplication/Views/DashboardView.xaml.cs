@@ -75,7 +75,7 @@ namespace MunicipalServicesApplication.Views
 
         private void BtnStatus_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Service Request Status functionality is under development.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+            NavigationRequested?.Invoke(this, "Status");
         }
 
         private void BtnExit_Click(object sender, RoutedEventArgs e)

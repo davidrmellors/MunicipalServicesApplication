@@ -89,3 +89,5 @@ C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplic
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\MunicipalServicesApplication.pdb
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\DashboardView.baml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\DashboardView.g.cs
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\ServiceRequestStatusView.baml
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\ServiceRequestStatusView.g.cs

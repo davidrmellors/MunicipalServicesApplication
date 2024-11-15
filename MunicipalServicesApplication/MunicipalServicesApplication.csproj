@@ -171,6 +171,9 @@
     <Compile Include="Views\ReportIssuesWindow.xaml.cs">
       <DependentUpon>ReportIssuesWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\ServiceRequestStatusView.xaml.cs">
+      <DependentUpon>ServiceRequestStatusView.xaml</DependentUpon>
+    </Compile>
     <Page Include="Views\DashboardView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -196,6 +199,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\ReportIssuesWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ServiceRequestStatusView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
