@@ -1,5 +1,6 @@
 ﻿using MunicipalServices.Models;
 using System;
+using System.Collections.Generic;
 
 namespace MunicipalServices.Core.DataStructures
 {
@@ -101,6 +102,57 @@ namespace MunicipalServices.Core.DataStructures
             y.Height = Math.Max(GetHeight(y.Left), GetHeight(y.Right)) + 1;
 
             return y;
+        }
+
+        public IEnumerable<ServiceRequest> GetHighestPriorityRequests(int count)
+        {
+            var result = new List<ServiceRequest>();
+            GetHighestPriorityRec(root, result, count);
+            return result;
+        }
+
+        private void GetHighestPriorityRec(Node node, List<ServiceRequest> result, int count)
+        {
+            if (node == null || result.Count >= count) return;
+
+            // Traverse right first to get highest priority
+            GetHighestPriorityRec(node.Right, result, count);
+
+            if (result.Count < count)
+            {
+                result.Add(node.Data);
+                GetHighestPriorityRec(node.Left, result, count);
+            }
+        }
+
+        public int CountByStatus(string status)
+        {
+            return CountByStatusRec(root, status);
+        }
+
+        private int CountByStatusRec(Node node, string status)
+        {
+            if (node == null) return 0;
+
+            int count = node.Data.Status == status ? 1 : 0;
+            return count + CountByStatusRec(node.Left, status) + CountByStatusRec(node.Right, status);
+        }
+
+        public IEnumerable<ServiceRequest> GetAll()
+        {
+            var result = new List<ServiceRequest>();
+            InOrderTraversal(root, result);
+            return result;
+        }
+
+        private void InOrderTraversal(Node node, List<ServiceRequest> result)
+        {
+            if (node != null)
+            {
+                InOrderTraversal(node.Left, result);
+                result.Add(node.Data);
+                InOrderTraversal(node.Right, result);
+            }
         }
     }
 }

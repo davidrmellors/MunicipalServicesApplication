@@ -5,62 +5,70 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using MunicipalServices.Core.DataStructures;
 using MunicipalServices.Models;
 
 namespace MunicipalServicesApplication.Views
 {
     public partial class DashboardView : UserControl
     {
-        private List<Issue> AllIssues;
         public event EventHandler<string> NavigationRequested;
-
+        private readonly ServiceRequestBST requestsBST;
+        private readonly EmergencyNoticeTree noticesTree;
+        private readonly ServiceStatusTree statusTree;
         public DashboardView()
         {
             InitializeComponent();
-            AllIssues = Issue.ReportedIssues.ToList();
-            UpdateIssuesDisplay();
+            requestsBST = new ServiceRequestBST();
+            noticesTree = EmergencyNoticeTree.Instance;
+            statusTree = new ServiceStatusTree();
+            LoadDashboardData();
         }
 
-        private void UpdateIssuesDisplay()
+        private void LoadDashboardData()
         {
-            IssuesItemsControl.ItemsSource = AllIssues;
+            LoadEmergencyNotices();
+            LoadServiceStatus();
+            LoadRecentRequests();
+            LoadCommunityStats();
         }
 
-        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void LoadEmergencyNotices()
         {
-            string searchText = SearchBox.Text.ToLower();
-            var filteredIssues = AllIssues.Where(issue =>
-                issue.Location.ToLower().Contains(searchText) ||
-                issue.Category.ToLower().Contains(searchText) ||
-                issue.Description.ToLower().Contains(searchText) ||
-                issue.Attachments.Any(attachment => attachment.Name.ToLower().Contains(searchText))
-            ).ToList();
-
-            IssuesItemsControl.ItemsSource = filteredIssues;
+            EmergencyNoticesControl.ItemsSource = noticesTree.GetAll();
         }
 
-        private void ViewAttachment_Click(object sender, RoutedEventArgs e)
+        private void LoadServiceStatus()
         {
-            if (sender is Button button && button.DataContext is Attachment attachment)
+            ServiceStatusControl.ItemsSource = statusTree.GetAll();
+        }
+
+        private void LoadRecentRequests()
+        {
+            var highPriorityRequests = requestsBST.GetHighestPriorityRequests(5)
+                .OrderByDescending(r => r.RequestId) // Show newest first
+                .ToList();
+            RecentRequestsControl.ItemsSource = highPriorityRequests;
+        }
+
+        private void CopyRequestId_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.DataContext is ServiceRequest request)
             {
-                try
-                {
-                    byte[] fileBytes = Convert.FromBase64String(attachment.Content);
-                    string tempFilePath = Path.Combine(Path.GetTempPath(), attachment.Name);
-                    File.WriteAllBytes(tempFilePath, fileBytes);
-
-                    var psi = new ProcessStartInfo
-                    {
-                        FileName = tempFilePath,
-                        UseShellExecute = true
-                    };
-                    Process.Start(psi);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error opening attachment: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                Clipboard.SetText(request.RequestId);
+                MessageBox.Show("Request ID copied to clipboard!", "Success",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
             }
+        }
+
+        private void LoadCommunityStats()
+        {
+            var stats = new[]
+            {
+                new CommunityStat { Label = "Active Requests", Value = requestsBST.CountByStatus("Pending").ToString() },
+                new CommunityStat { Label = "Resolved This Week", Value = requestsBST.CountByStatus("Resolved").ToString() }
+            };
+            StatsControl.ItemsSource = stats;
         }
 
         private void BtnEvents_Click(object sender, RoutedEventArgs e)
@@ -81,12 +89,6 @@ namespace MunicipalServicesApplication.Views
         private void BtnExit_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
-        }
-
-        public void RefreshIssues()
-        {
-            AllIssues = Issue.ReportedIssues.ToList();
-            UpdateIssuesDisplay();
         }
     }
 }

@@ -28,6 +28,7 @@ namespace MunicipalServicesApplication.Views
                 App.CurrentUser = userProfileService.GetOrCreateUser(idNumber);
                 MainWindow mainWindow = new MainWindow();
                 mainWindow.Show();
+                Close();
             }
             else
             {

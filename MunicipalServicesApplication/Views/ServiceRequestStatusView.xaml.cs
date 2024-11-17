@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using MunicipalServices.Core.DataStructures;
 using MunicipalServices.Models;
 
 namespace MunicipalServicesApplication.Views
@@ -11,23 +12,25 @@ namespace MunicipalServicesApplication.Views
     public partial class ServiceRequestStatusView : UserControl
     {
         public event EventHandler BackToMainRequested;
+        private readonly ServiceRequestBST requestsBST;
 
         public ServiceRequestStatusView()
         {
             InitializeComponent();
+            requestsBST = new ServiceRequestBST();
             SearchRequestId.TextChanged += SearchRequestId_TextChanged;
             UpdateRequestsDisplay();
         }
 
         private void UpdateRequestsDisplay()
         {
-            var issues = Issue.ReportedIssues.ToList();
-            if (!issues.Any())
+            var requests = requestsBST.GetAll();
+            if (!requests.Any())
             {
                 RequestsItemsControl.ItemsSource = null;
                 return;
             }
-            RequestsItemsControl.ItemsSource = issues;
+            RequestsItemsControl.ItemsSource = requests;
         }
 
         private void SearchRequestId_TextChanged(object sender, TextChangedEventArgs e)
@@ -39,13 +42,10 @@ namespace MunicipalServicesApplication.Views
                 return;
             }
 
-            var filteredIssues = Issue.ReportedIssues
-                .Where(i => i.Location.ToLower().Contains(searchText) ||
-                            i.Category.ToLower().Contains(searchText) ||
-                            i.Description.ToLower().Contains(searchText))
+            var requests = requestsBST.GetAll()
+                .Where(r => r.RequestId.ToLower().Contains(searchText))
                 .ToList();
-
-            RequestsItemsControl.ItemsSource = filteredIssues;
+            RequestsItemsControl.ItemsSource = requests;
         }
 
         private void ViewAttachment_Click(object sender, RoutedEventArgs e)

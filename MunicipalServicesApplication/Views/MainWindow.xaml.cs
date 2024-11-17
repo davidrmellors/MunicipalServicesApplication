@@ -30,7 +30,6 @@ namespace MunicipalServicesApplication.Views
                     SwitchView(new ReportIssuesWindow());
                     break;
                 case "Dashboard":
-                    _dashboardView.RefreshIssues();
                     SwitchView(_dashboardView);
                     break;
                 case "Status":

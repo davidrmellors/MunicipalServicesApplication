@@ -5,6 +5,7 @@ using System.Windows;
 using Microsoft.Win32;
 using System.Windows.Controls;
 using MunicipalServices.Models;
+using MunicipalServices.Core.DataStructures;
 
 namespace MunicipalServicesApplication.Views
 {
@@ -12,10 +13,12 @@ namespace MunicipalServicesApplication.Views
     {
         private List<Attachment> attachments = new List<Attachment>();
         public event EventHandler BackToMainRequested;
+        private readonly ServiceRequestBST requestsBST;
 
         public ReportIssuesWindow()
         {
             InitializeComponent();
+            requestsBST = new ServiceRequestBST();
         }
 
         private void AttachFiles_Click(object sender, RoutedEventArgs e)
@@ -50,22 +53,36 @@ namespace MunicipalServicesApplication.Views
 
         private void SubmitButton_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(TxtLocation.Text) || CmbCategory.SelectedItem == null || string.IsNullOrWhiteSpace(TxtDescription.Text))
+            if (string.IsNullOrWhiteSpace(TxtLocation.Text) ||
+                CmbCategory.SelectedItem == null ||
+                string.IsNullOrWhiteSpace(TxtDescription.Text))
             {
-                MessageBox.Show("Please fill in all required fields.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Please fill in all required fields.", "Validation Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            Issue newIssue = new Issue
+            var request = new ServiceRequest
             {
+                RequestId = GenerateRequestId(),
                 Location = TxtLocation.Text,
                 Category = (CmbCategory.SelectedItem as ComboBoxItem).Content.ToString(),
                 Description = TxtDescription.Text,
                 Attachments = new List<Attachment>(attachments)
             };
 
-            Issue.ReportedIssues.Add(newIssue);
-            MessageBox.Show("Issue reported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            request.CalculatePriority();
+            requestsBST.Insert(request);
+
+            MessageBox.Show($"Service request submitted successfully!\nRequest ID: {request.RequestId}",
+                "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            ClearForm();
+        }
+
+        private string GenerateRequestId()
+        {
+            return $"REQ-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8)}";
         }
 
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -75,6 +92,15 @@ namespace MunicipalServicesApplication.Views
             {
                 textBox.Text = string.Empty;
             }
+        }
+
+        private void ClearForm()
+        {
+            TxtLocation.Text = "Enter Location";
+            TxtDescription.Text = "Enter Description";
+            CmbCategory.SelectedIndex = -1;
+            attachments.Clear();
+            UpdateAttachmentCount();
         }
 
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)

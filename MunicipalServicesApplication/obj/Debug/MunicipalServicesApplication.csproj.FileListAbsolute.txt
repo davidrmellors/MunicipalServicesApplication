@@ -1,11 +1,16 @@
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\MunicipalServicesApplication.csproj.AssemblyReference.cache
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\DashboardView.baml
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\LocalEventsWindow.baml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\LoginWindow.baml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\MainWindow.baml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\ReportIssuesWindow.baml
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\ServiceRequestStatusView.baml
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\DashboardView.g.cs
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\LocalEventsWindow.g.cs
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\LoginWindow.g.cs
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\MainWindow.g.cs
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\ReportIssuesWindow.g.cs
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\ServiceRequestStatusView.g.cs
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\App.g.cs
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\MunicipalServicesApplication_MarkupCompile.cache
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\MunicipalServicesApplication_MarkupCompile.lref
@@ -78,7 +83,6 @@ C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplic
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Text.Json.xml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.Threading.Tasks.Extensions.xml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\System.ValueTuple.xml
-C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\LocalEventsWindow.baml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\App.baml
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\MunicipalServicesApplication.g.resources
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\MunicipalServicesApplication.Properties.Resources.resources
@@ -87,7 +91,3 @@ C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplic
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Municipa.F4AF7ECE.Up2Date
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\MunicipalServicesApplication.exe
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\MunicipalServicesApplication.pdb
-C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\DashboardView.baml
-C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\DashboardView.g.cs
-C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\ServiceRequestStatusView.baml
-C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Views\ServiceRequestStatusView.g.cs
