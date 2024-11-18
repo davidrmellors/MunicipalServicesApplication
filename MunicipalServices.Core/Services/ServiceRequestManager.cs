@@ -5,73 +5,74 @@ using System.Text;
 using System.Threading.Tasks;
 using MunicipalServices.Core.DataStructures;
 using MunicipalServices.Models;
+using MunicipalServices.Core.Services;
+using System.Diagnostics;
+using System.Data.SQLite;
 
 namespace MunicipalServices.Core.Services
 {
     public class ServiceRequestManager
     {
-        private readonly ServiceRequestBST _regularRequests;
-        private readonly RedBlackTree _priorityRequests;
-        private readonly ServiceRequestGraph _relatedRequests;
-        private readonly ServiceStatusTree _statusTree;
-        private readonly DataManager _dataManager;
-        private readonly EmergencyNoticeTree _emergencyNotices = EmergencyNoticeTree.Instance;
+        private readonly ServiceRequestGraph _requestGraph;
+        private readonly RedBlackTree _requestTree;
 
-        public ServiceRequestManager(DataManager dataManager)
+        public ServiceRequestManager()
         {
-            _dataManager = dataManager;
-            _regularRequests = new ServiceRequestBST();
-            _priorityRequests = new RedBlackTree();
-            _relatedRequests = new ServiceRequestGraph(dataManager);
-            _statusTree = new ServiceStatusTree();
+            _requestGraph = new ServiceRequestGraph();
+            _requestTree = new RedBlackTree();
         }
 
         public void ProcessNewRequest(ServiceRequest request)
         {
-            // Store in appropriate tree based on priority
-            if (request.Priority >= 8)
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            using (var connection = new SQLiteConnection(DatabaseService.Instance.ConnectionString))
             {
-                _priorityRequests.Insert(request);
-                
-                // Create emergency notice for high-priority requests
-                var notice = new EmergencyNotice
+                connection.Open();
+                using (var transaction = connection.BeginTransaction())
                 {
-                    Title = $"High Priority Request: {request.Category}",
-                    Description = request.Description,
-                    RelatedRequestId = request.RequestId
-                };
-                _emergencyNotices.Insert(notice);
+                    try
+                    {
+                        // Save the main request
+                        DatabaseService.Instance.SaveServiceRequestWithTransaction(connection, request);
+
+                        // Add to graph and tree
+                        _requestGraph.AddRequest(request);
+                        _requestTree.Insert(request);
+
+                        // Get and save related requests within the same transaction
+                        var relatedRequests = _requestGraph.GetImpactCluster(request.RequestId);
+                        if (relatedRequests.Any())
+                        {
+                            DatabaseService.Instance.SaveRelatedIssuesWithTransaction(
+                                connection, 
+                                request.RequestId, 
+                                relatedRequests.Select(r => r.RequestId));
+                        }
+
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw new InvalidOperationException($"Failed to process request: {ex.Message}", ex);
+                    }
+                }
             }
-            else
+        }
+
+        public IEnumerable<ServiceRequest> GetRelatedIssues(string requestId)
+        {
+            try
             {
-                _regularRequests.Insert(request);
+                return _requestGraph.GetImpactCluster(requestId);
             }
-
-            // Add to graph for relationship tracking
-            _relatedRequests.AddRequest(request);
-
-            // Update service status
-            UpdateServiceStatus(request);
-        }
-
-        public IEnumerable<ServiceRequest> GetRelatedRequests(string requestId)
-        {
-            return _relatedRequests.GetRelatedRequests(requestId, ServiceRequestGraph.TraversalType.Priority);
-        }
-
-        private void UpdateServiceStatus(ServiceRequest request)
-        {
-            var status = new ServiceStatus
+            catch (Exception ex)
             {
-                Service = request.Category,
-                Status = DetermineServiceStatus(request)
-            };
-            _statusTree.Insert(status);
-        }
-
-        private string DetermineServiceStatus(ServiceRequest request)
-        {
-            return request.Priority >= 8 ? "Critical" : "Active";
+                Debug.WriteLine($"Error getting related issues: {ex.Message}");
+                return Enumerable.Empty<ServiceRequest>();
+            }
         }
     }
 }

@@ -14,7 +14,6 @@ namespace MunicipalServicesApplication.Views
     public partial class DashboardView : UserControl
     {
         public event EventHandler<string> NavigationRequested;
-        private readonly ServiceRequestBST requestsBST;
         private readonly EmergencyNoticeTree noticesTree;
         private readonly ServiceStatusTree statusTree;
         private readonly CurrentUser currentUser;
@@ -24,7 +23,7 @@ namespace MunicipalServicesApplication.Views
         {
             InitializeComponent();
             currentUser = user;
-            _requestManager = new ServiceRequestManager(DataManager.Instance);
+            _requestManager = new ServiceRequestManager();
             noticesTree = EmergencyNoticeTree.Instance;
             statusTree = new ServiceStatusTree();
             LoadDashboardData();
@@ -38,14 +37,6 @@ namespace MunicipalServicesApplication.Views
             LoadCommunityStats();
         }
 
-        private void HandleNewRequest(ServiceRequest request)
-        {
-            _requestManager.ProcessNewRequest(request);
-
-            // Get related requests to show on dashboard
-            var relatedRequests = _requestManager.GetRelatedRequests(request.RequestId);
-            RelatedRequestsControl.ItemsSource = relatedRequests;
-        }
 
         private void LoadEmergencyNotices()
         {
@@ -63,9 +54,16 @@ namespace MunicipalServicesApplication.Views
             {
                 var allRequests = DatabaseService.Instance.GetAllRequests();
                 var recentRequests = allRequests
-                    .OrderByDescending(r => r.Priority)
+                    .OrderByDescending(r => r.SubmissionDate)
                     .Take(5)
                     .ToList();
+
+                foreach (var request in recentRequests)
+                {
+                    request.RelatedIssues = _requestManager.GetRelatedIssues(request.RequestId);
+                    request.Attachments = DatabaseService.Instance.GetAttachmentsForRequest(request.RequestId);
+                }
+
                 RecentRequestsControl.ItemsSource = recentRequests;
             }
             catch (Exception ex)
@@ -121,11 +119,6 @@ namespace MunicipalServicesApplication.Views
         private void BtnStatus_Click(object sender, RoutedEventArgs e)
         {
             NavigationRequested?.Invoke(this, "Status");
-        }
-
-        private void BtnPerformance_Click(object sender, RoutedEventArgs e)
-        {
-            NavigationRequested?.Invoke(this, "Performance");
         }
 
         private void BtnExit_Click(object sender, RoutedEventArgs e)

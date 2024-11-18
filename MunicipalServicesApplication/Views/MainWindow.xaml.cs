@@ -12,9 +12,9 @@ namespace MunicipalServicesApplication.Views
         private readonly UserProfileService _userService;
         private UserControl _currentView;
         private DashboardView _dashboardView;
+        private bool isMetricsWindowShown;
         public CurrentUser CurrentUser { get; private set; }
 
-        private bool isPerformanceWindowShown;
         public MainWindow()
         {
             InitializeComponent();

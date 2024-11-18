@@ -2,7 +2,6 @@
 using MunicipalServices.Models;
 using System;
 using System.Collections.Generic;
-using MunicipalServices.Core.Monitoring;
 using System.Linq;
 
 namespace MunicipalServices.Core.DataStructures
@@ -11,17 +10,24 @@ namespace MunicipalServices.Core.DataStructures
     {
         private ServiceRequestNode root;
         private int nodeCount;
-        private readonly PerformanceTracker _performanceTracker = new PerformanceTracker();
+
+        public ServiceRequestBST()
+        {
+            root = null;
+        }
 
         public override int Count => nodeCount;
 
+        private int GetTreeHeight(ServiceRequestNode node)
+        {
+            if (node == null) return 0;
+            return 1 + Math.Max(GetTreeHeight(node.Left), GetTreeHeight(node.Right));
+        }
+
         public override void Insert(ServiceRequest request)
         {
-            _performanceTracker.TrackOperation("BST", "Insert", nodeCount, () =>
-            {
-                root = InsertRec(root, request);
-                nodeCount++;
-            });
+            root = InsertRec(root, request);
+            nodeCount++;
         }
 
         private ServiceRequestNode InsertRec(ServiceRequestNode node, ServiceRequest request)
@@ -42,10 +48,8 @@ namespace MunicipalServices.Core.DataStructures
         public override ServiceRequest Find(string requestId)
         {
             ServiceRequest result = null;
-            _performanceTracker.TrackOperation("BST", "Search", nodeCount, () =>
-            {
-                result = FindRec(root, requestId)?.Data;
-            });
+            result = FindRec(root, requestId)?.Data;
+
             return result;
         }
 
@@ -63,7 +67,9 @@ namespace MunicipalServices.Core.DataStructures
         public IEnumerable<ServiceRequest> GetAll()
         {
             var result = new List<ServiceRequest>();
+
             InOrderTraversal(root, result);
+
             return result;
         }
 
@@ -75,6 +81,47 @@ namespace MunicipalServices.Core.DataStructures
                 result.Add(node.Data);
                 InOrderTraversal(node.Right, result);
             }
+        }
+
+        public override void Delete(string requestId)
+        {
+            root = DeleteRec(root, requestId);
+            nodeCount--;
+        }
+
+        private ServiceRequestNode DeleteRec(ServiceRequestNode node, string requestId)
+        {
+            if (node == null)
+                return null;
+
+            int comparison = string.Compare(requestId, node.Data.RequestId);
+            
+            if (comparison < 0)
+                node.Left = DeleteRec(node.Left, requestId);
+            else if (comparison > 0)
+                node.Right = DeleteRec(node.Right, requestId);
+            else
+            {
+                // Node to delete found
+                if (node.Left == null)
+                    return node.Right;
+                else if (node.Right == null)
+                    return node.Left;
+
+                // Node with two children
+                var successor = FindMin(node.Right);
+                node.Data = successor.Data;
+                node.Right = DeleteRec(node.Right, successor.Data.RequestId);
+            }
+
+            return node;
+        }
+
+        private ServiceRequestNode FindMin(ServiceRequestNode node)
+        {
+            while (node.Left != null)
+                node = node.Left;
+            return node;
         }
     }
 }

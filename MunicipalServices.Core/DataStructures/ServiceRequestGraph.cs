@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MunicipalServices.Core.Services;
 using MunicipalServices.Models;
+using System.Diagnostics;
 
 namespace MunicipalServices.Core.DataStructures
 {
@@ -10,7 +11,48 @@ namespace MunicipalServices.Core.DataStructures
     {
         private readonly Dictionary<string, ServiceRequest> _nodes;
         private readonly Dictionary<string, HashSet<string>> _adjacencyList;
-        private readonly DataManager _dataManager;
+
+        public IEnumerable<ServiceRequest> GetImpactCluster(string requestId)
+        {
+            var cluster = new HashSet<ServiceRequest>();
+            var heap = new ServiceRequestHeap();
+            var visited = new HashSet<string>();
+            
+            if (!_nodes.ContainsKey(requestId))
+                return cluster;
+                
+            var initial = _nodes[requestId];
+            heap.Insert(initial);
+            
+            while (true)
+            {
+                ServiceRequest current;
+                try
+                {
+                    current = heap.ExtractMax();
+                }
+                catch (InvalidOperationException)
+                {
+                    break;
+                }
+                
+                if (!visited.Add(current.RequestId)) 
+                    continue;
+                
+                cluster.Add(current);
+                
+                foreach (var relatedId in _adjacencyList[current.RequestId])
+                {
+                    if (!visited.Contains(relatedId))
+                    {
+                        var related = _nodes[relatedId];
+                        heap.Insert(related);
+                    }
+                }
+            }
+
+            return cluster;
+        }
 
         public enum TraversalType
         {
@@ -19,9 +61,8 @@ namespace MunicipalServices.Core.DataStructures
             Priority        // Priority-based traversal
         }
 
-        public ServiceRequestGraph(DataManager dataManager)
+        public ServiceRequestGraph()
         {
-            _dataManager = dataManager;
             _nodes = new Dictionary<string, ServiceRequest>();
             _adjacencyList = new Dictionary<string, HashSet<string>>();
         }
@@ -62,12 +103,62 @@ namespace MunicipalServices.Core.DataStructures
 
         private bool AreRequestsRelated(ServiceRequest r1, ServiceRequest r2)
         {
-            return r1.Location == r2.Location || r1.Category == r2.Category;
+            if (r1 == null || r2 == null) return false;
+
+            int relationshipScore = 0;
+            
+            // Category matching (highest weight)
+            if (r1.Category == r2.Category)
+                relationshipScore += 40;
+            
+            // Location proximity (medium weight)
+            if (AreLocationsNearby(r1, r2))
+                relationshipScore += 30;
+            
+            // Time proximity (lower weight)
+            var timeDiff = Math.Abs((r1.SubmissionDate - r2.SubmissionDate).TotalHours);
+            if (timeDiff <= 24) // Within 24 hours
+                relationshipScore += 20;
+            
+            // Priority similarity (lowest weight)
+            if (Math.Abs(r1.Priority - r2.Priority) <= 1)
+                relationshipScore += 10;
+            
+            return relationshipScore >= 40; // Threshold for considering requests related
+        }
+
+        private bool AreLocationsNearby(ServiceRequest r1, ServiceRequest r2)
+        {
+            if (r1.Latitude == 0 || r1.Longitude == 0 || r2.Latitude == 0 || r2.Longitude == 0)
+                return r1.Location.Equals(r2.Location, StringComparison.OrdinalIgnoreCase);
+
+            // Calculate distance using Haversine formula
+            const double earthRadius = 6371; // Earth's radius in kilometers
+            var lat1 = ToRadian(r1.Latitude);
+            var lon1 = ToRadian(r1.Longitude);
+            var lat2 = ToRadian(r2.Latitude);
+            var lon2 = ToRadian(r2.Longitude);
+
+            var dLat = lat2 - lat1;
+            var dLon = lon2 - lon1;
+
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(lat1) * Math.Cos(lat2) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            var c = 2 * Math.Asin(Math.Sqrt(a));
+            var distance = earthRadius * c;
+
+            return distance <= 1.0; // Within 1 kilometer
+        }
+
+        private double ToRadian(double degree)
+        {
+            return degree * Math.PI / 180;
         }
 
         public IEnumerable<ServiceRequest> GetRelatedRequests(string requestId, TraversalType traversalType = TraversalType.BFS)
         {
-            if (!_nodes.ContainsKey(requestId))
+            if (!_adjacencyList.ContainsKey(requestId))
                 return Enumerable.Empty<ServiceRequest>();
 
             var visited = new HashSet<string>();
@@ -78,14 +169,17 @@ namespace MunicipalServices.Core.DataStructures
                 case TraversalType.BFS:
                     BFSTraversal(requestId, visited, result);
                     break;
+
                 case TraversalType.DFS:
                     DFSTraversal(requestId, visited, result);
                     break;
+
                 case TraversalType.Priority:
                     PriorityTraversal(requestId, visited, result);
                     break;
             }
 
+            Debug.WriteLine($"Found {result.Count} related requests for {requestId} using {traversalType} traversal");
             return result;
         }
 
@@ -98,7 +192,8 @@ namespace MunicipalServices.Core.DataStructures
             while (queue.Count > 0)
             {
                 var currentId = queue.Dequeue();
-                result.Add(_nodes[currentId]);
+                if (_nodes.ContainsKey(currentId))
+                    result.Add(_nodes[currentId]);
 
                 foreach (var neighborId in _adjacencyList[currentId])
                 {
@@ -114,7 +209,8 @@ namespace MunicipalServices.Core.DataStructures
         private void DFSTraversal(string currentId, HashSet<string> visited, List<ServiceRequest> result)
         {
             visited.Add(currentId);
-            result.Add(_nodes[currentId]);
+            if (_nodes.ContainsKey(currentId))
+                result.Add(_nodes[currentId]);
 
             foreach (var neighborId in _adjacencyList[currentId])
             {
@@ -127,25 +223,40 @@ namespace MunicipalServices.Core.DataStructures
 
         private void PriorityTraversal(string startId, HashSet<string> visited, List<ServiceRequest> result)
         {
-            var priorityQueue = new SortedSet<(int priority, string id)>();
-            priorityQueue.Add((-_nodes[startId].Priority, startId));
+            var priorityQueue = new SortedDictionary<int, Queue<string>>(Comparer<int>.Create((a, b) => b.CompareTo(a)));
+            
+            var startPriority = _nodes[startId].Priority;
+            if (!priorityQueue.ContainsKey(startPriority))
+            {
+                priorityQueue.Add(startPriority, new Queue<string>());
+            }
+            priorityQueue[startPriority].Enqueue(startId);
             visited.Add(startId);
 
-            while (priorityQueue.Count > 0)
+            while (priorityQueue.Any())
             {
-                var current = priorityQueue.Min;
-                priorityQueue.Remove(current);
-                var currentId = current.id;
-                result.Add(_nodes[currentId]);
+                var currentPriority = priorityQueue.First();
+                var currentId = currentPriority.Value.Dequeue();
+
+                if (_nodes.ContainsKey(currentId))
+                    result.Add(_nodes[currentId]);
 
                 foreach (var neighborId in _adjacencyList[currentId])
                 {
                     if (!visited.Contains(neighborId))
                     {
                         visited.Add(neighborId);
-                        priorityQueue.Add((-_nodes[neighborId].Priority, neighborId));
+                        var priority = _nodes[neighborId].Priority;
+                        
+                        if (!priorityQueue.ContainsKey(priority))
+                            priorityQueue.Add(priority, new Queue<string>());
+                            
+                        priorityQueue[priority].Enqueue(neighborId);
                     }
                 }
+
+                if (!currentPriority.Value.Any())
+                    priorityQueue.Remove(currentPriority.Key);
             }
         }
 

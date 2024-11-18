@@ -156,14 +156,6 @@
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="BtnPerformance" Click="BtnPerformance_Click"
-                            Style="{StaticResource MaterialDesignFlatButton}"
-                            Height="50" HorizontalContentAlignment="Left" Foreground="White">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="ChartLineVariant" Margin="0,0,10,0"/>
-                            <TextBlock Text="Performance Monitor"/>
-                        </StackPanel>
-                    </Button>
                 </StackPanel>
 
                 <Button x:Name="BtnExit" Click="BtnExit_Click"

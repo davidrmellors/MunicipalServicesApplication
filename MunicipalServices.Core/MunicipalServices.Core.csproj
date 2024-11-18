@@ -97,12 +97,9 @@
     <Compile Include="DataStructures\ServiceRequestNode.cs" />
     <Compile Include="DataStructures\ServiceRequestTree.cs" />
     <Compile Include="DataStructures\ServiceStatusTree.cs" />
-    <Compile Include="Monitoring\PerformanceTracker.cs" />
-    <Compile Include="Monitoring\TreePerformanceMetrics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AnnouncementService.cs" />
     <Compile Include="Services\DatabaseService.cs" />
-    <Compile Include="Services\DataManager.cs" />
     <Compile Include="Services\EmergencyManager.cs" />
     <Compile Include="Services\EmergencyResponseCoordinator.cs" />
     <Compile Include="Services\EventService.cs" />

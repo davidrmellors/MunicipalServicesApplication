@@ -9,5 +9,6 @@ namespace MunicipalServices.Core.DataStructures
         public abstract int Count { get; }
         public abstract void Insert(ServiceRequest request);
         public abstract ServiceRequest Find(string requestId);
+        public abstract void Delete(string requestId);
     }
 }

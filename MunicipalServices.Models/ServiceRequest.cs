@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace MunicipalServices.Models
 {
-    public class ServiceRequest : IComparable<ServiceRequest>
+    public class ServiceRequest : IComparable<ServiceRequest>, INotifyPropertyChanged
     {
         public string RequestId { get; set; }
         public string Category { get; set; }
@@ -13,12 +14,26 @@ namespace MunicipalServices.Models
         public string Status { get; set; }
         public DateTime SubmissionDate { get; set; }
         public int Priority { get; private set; }
-        public List<Attachment> Attachments { get; set; } = new List<Attachment>();
+        private List<Attachment> _attachments;
+        public List<Attachment> Attachments
+        {
+            get => _attachments ?? (_attachments = new List<Attachment>());
+            set
+            {
+                if (_attachments != value)
+                {
+                    _attachments = value;
+                    OnPropertyChanged(nameof(Attachments));
+                }
+            }
+        }
         public string Type { get; set; }
         public DateTime CreatedAt { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public string FormattedAddress { get; set; }
+
+        public IEnumerable<ServiceRequest> RelatedIssues { get; set; }
 
 
         private static int counter = 0;
@@ -26,6 +41,7 @@ namespace MunicipalServices.Models
 
         public ServiceRequest()
         {
+            RelatedIssues = new List<ServiceRequest>();
             lock (lockObject)
             {
                 counter++;
@@ -78,6 +94,13 @@ namespace MunicipalServices.Models
                     Priority = 1;
                     break;
             }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

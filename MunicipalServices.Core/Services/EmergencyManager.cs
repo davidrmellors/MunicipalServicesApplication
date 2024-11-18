@@ -13,6 +13,11 @@ namespace MunicipalServices.Core.Services
         private readonly EmergencyNoticeTree _noticeTree = EmergencyNoticeTree.Instance;
         private readonly ServiceRequestGraph _relatedIssues;
 
+        public EmergencyManager(ServiceRequestGraph relatedIssues)
+        {
+            _relatedIssues = relatedIssues;
+        }
+
         public void PublishEmergencyNotice(EmergencyNotice notice)
         {
             _noticeTree.Insert(notice);
@@ -24,7 +29,7 @@ namespace MunicipalServices.Core.Services
             );
 
             // Notify affected areas
-            foreach (var request in relatedRequests)
+            foreach (var request in relatedRequests.Where(r => !string.IsNullOrEmpty(r.UserId)))
             {
                 NotificationService.Send(request.UserId, notice);
             }

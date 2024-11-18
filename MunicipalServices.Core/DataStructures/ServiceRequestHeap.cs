@@ -9,12 +9,10 @@ namespace MunicipalServices.Core.DataStructures
     public class ServiceRequestHeap
     {
         private List<ServiceRequest> heap;
-        private readonly DataManager dataManager;
 
-        public ServiceRequestHeap(DataManager dataManager)
+        public ServiceRequestHeap()
         {
             this.heap = new List<ServiceRequest>();
-            this.dataManager = dataManager;
         }
 
         public void Insert(ServiceRequest request)

@@ -30,12 +30,12 @@ namespace MunicipalServicesApplication.Views
             InitializeComponent();
             attachments = new List<Attachment>();
             currentUser = user;
-            placesService = new GooglePlacesService("AIzaSyA-_iYlhhs3iy-tPW33ScC7wDMO5qUAnFE");
+            placesService = new GooglePlacesService("AIzaSyCyt7gd-FzBDBA9h3r7AwNH5Zp40Rh1EhI");
             
             selectedLatitude = 0;
             selectedLongitude = 0;
             formattedAddress = string.Empty;
-            _requestManager = new ServiceRequestManager(DataManager.Instance);
+            _requestManager = new ServiceRequestManager();
         }
 
         private async void Location_TextChanged(object sender, TextChangedEventArgs e)
@@ -116,11 +116,18 @@ namespace MunicipalServicesApplication.Views
                     try
                     {
                         byte[] fileBytes = File.ReadAllBytes(filename);
-                        attachments.Add(new Attachment { Name = Path.GetFileName(filename), Content = fileBytes });
+                        var attachment = new Attachment 
+                        { 
+                            Name = Path.GetFileName(filename),
+                            ContentBase64 = Convert.ToBase64String(fileBytes)
+                        };
+                        attachments.Add(attachment);
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Error attaching file {filename}: {ex.Message}", "Error", MessageBoxButton.OK,
+                        MessageBox.Show($"Error attaching file {filename}: {ex.Message}", 
+                            "Error", 
+                            MessageBoxButton.OK,
                             MessageBoxImage.Error);
                     }
                 }
@@ -144,26 +151,47 @@ namespace MunicipalServicesApplication.Views
                 return;
             }
 
-            var request = new ServiceRequest
+            try
             {
-                RequestId = GenerateRequestId(),
-                Location = formattedAddress ?? TxtLocation.Text,
-                Category = (CmbCategory.SelectedItem as ComboBoxItem).Content.ToString(),
-                Description = TxtDescription.Text,
-                Attachments = new List<Attachment>(attachments),
-                Latitude = selectedLatitude,
-                Longitude = selectedLongitude
-            };
+                var request = new ServiceRequest
+                {
+                    RequestId = GenerateRequestId(),
+                    Location = formattedAddress ?? TxtLocation.Text,
+                    Category = (CmbCategory.SelectedItem as ComboBoxItem).Content.ToString(),
+                    Description = TxtDescription.Text,
+                    Status = "Pending",
+                    UserId = currentUser?.Id ?? "anonymous",
+                    SubmissionDate = DateTime.Now,
+                    Latitude = selectedLatitude,
+                    Longitude = selectedLongitude,
+                    FormattedAddress = formattedAddress
+                };
 
-            request.CalculatePriority();
+                request.CalculatePriority();
 
-            _requestManager.ProcessNewRequest(request);
+                // Save attachments first
+                foreach (var attachment in attachments)
+                {
+                    attachment.RequestId = request.RequestId;
+                }
+                request.Attachments = attachments;
 
-            MessageBox.Show($"Service request submitted successfully!\nRequest ID: {request.RequestId}",
-                "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                // Process the request with all data
+                _requestManager.ProcessNewRequest(request);
 
-            ClearForm();
-            BackToMainRequested?.Invoke(this, EventArgs.Empty);
+                MessageBox.Show($"Service request submitted successfully!\nRequest ID: {request.RequestId}",
+                    "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                ClearForm();
+                BackToMainRequested?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error submitting request: {ex.Message}", 
+                    "Error", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Error);
+            }
         }
 
         private string GenerateRequestId()
@@ -186,6 +214,9 @@ namespace MunicipalServicesApplication.Views
             TxtDescription.Text = "Enter Description";
             CmbCategory.SelectedIndex = -1;
             attachments.Clear();
+            selectedLatitude = 0;
+            selectedLongitude = 0;
+            formattedAddress = string.Empty;
             UpdateAttachmentCount();
         }
 
