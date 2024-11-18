@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\App.xaml
-61916252604
+61753466648
 
-12-1928193484
-1521105163511
+12-748674210
+152-984688084
 Views\DashboardView.xaml;Views\LocalEventsWindow.xaml;Views\LoginWindow.xaml;Views\MainWindow.xaml;Views\ReportIssuesWindow.xaml;Views\ServiceRequestStatusView.xaml;
 
-False
+True
 
