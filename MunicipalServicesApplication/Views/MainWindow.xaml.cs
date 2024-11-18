@@ -1,6 +1,9 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using MunicipalServices.Core.Services;
+using MunicipalServices.Models;
+using System.Threading.Tasks;
 
 namespace MunicipalServicesApplication.Views
 {
@@ -9,14 +12,34 @@ namespace MunicipalServicesApplication.Views
         private readonly UserProfileService _userService;
         private UserControl _currentView;
         private DashboardView _dashboardView;
+        public CurrentUser CurrentUser { get; private set; }
 
+        private bool isPerformanceWindowShown;
         public MainWindow()
         {
             InitializeComponent();
             _userService = new UserProfileService();
-            _dashboardView = new DashboardView();
-            _dashboardView.NavigationRequested += OnNavigationRequested;
-            SwitchView(_dashboardView);
+            _ = InitializeApplicationAsync();
+        }
+
+        private async Task InitializeApplicationAsync()
+        {
+            try
+            {
+                CurrentUser = _userService.GetOrCreateUser(Environment.UserName);
+
+                // Initialize database first
+                
+                // Setup dashboard after data is initialized
+                _dashboardView = new DashboardView(CurrentUser);
+                _dashboardView.NavigationRequested += OnNavigationRequested;
+                SwitchView(_dashboardView);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error initializing application: {ex.Message}", "Initialization Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void OnNavigationRequested(object sender, string destination)
@@ -27,7 +50,7 @@ namespace MunicipalServicesApplication.Views
                     SwitchView(new LocalEventsWindow());
                     break;
                 case "ReportIssues":
-                    SwitchView(new ReportIssuesWindow());
+                    SwitchView(new ReportIssuesWindow(CurrentUser));
                     break;
                 case "Dashboard":
                     SwitchView(_dashboardView);
@@ -57,9 +80,11 @@ namespace MunicipalServicesApplication.Views
                 }
             }
 
+            _dashboardView.RefreshData();
             MainContent.Children.Clear();
             MainContent.Children.Add(newView);
             _currentView = newView;
         }
+
     }
 }

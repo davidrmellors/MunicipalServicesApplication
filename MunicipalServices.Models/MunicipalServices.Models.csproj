@@ -46,6 +46,7 @@
     <Compile Include="CommunityStat.cs" />
     <Compile Include="CurrentUser.cs" />
     <Compile Include="EmergencyNotice.cs" />
+    <Compile Include="GooglePlacesModel.cs" />
     <Compile Include="LocalEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceRequest.cs" />

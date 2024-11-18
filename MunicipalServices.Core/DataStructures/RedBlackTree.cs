@@ -1,13 +1,15 @@
-﻿using MunicipalServices.Core.Services;
-using MunicipalServices.Models;
+﻿using MunicipalServices.Models;
+using MunicipalServices.Core.Services;
 using System;
 using System.Collections.Generic;
-using MunicipalServices.Core.Monitoring;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MunicipalServices.Core.Monitoring;
 
 namespace MunicipalServices.Core.DataStructures
 {
-    public class ServiceRequestBST : ServiceRequestTree
+    public class RedBlackTree : ServiceRequestTree
     {
         private ServiceRequestNode root;
         private int nodeCount;
@@ -17,9 +19,10 @@ namespace MunicipalServices.Core.DataStructures
 
         public override void Insert(ServiceRequest request)
         {
-            _performanceTracker.TrackOperation("BST", "Insert", nodeCount, () =>
+            _performanceTracker.TrackOperation("RB", "Insert", nodeCount, () =>
             {
                 root = InsertRec(root, request);
+                root.IsRed = false; // Root must be black
                 nodeCount++;
             });
         }
@@ -36,13 +39,53 @@ namespace MunicipalServices.Core.DataStructures
             else if (comparison > 0)
                 node.Right = InsertRec(node.Right, request);
 
+            // Fix Red-Black Tree violations
+            if (IsRed(node.Right) && !IsRed(node.Left))
+                node = RotateLeft(node);
+            if (IsRed(node.Left) && IsRed(node.Left.Left))
+                node = RotateRight(node);
+            if (IsRed(node.Left) && IsRed(node.Right))
+                FlipColors(node);
+
             return node;
+        }
+
+        private bool IsRed(ServiceRequestNode node)
+        {
+            return node != null && node.IsRed;
+        }
+
+        private ServiceRequestNode RotateLeft(ServiceRequestNode h)
+        {
+            ServiceRequestNode x = h.Right;
+            h.Right = x.Left;
+            x.Left = h;
+            x.IsRed = h.IsRed;
+            h.IsRed = true;
+            return x;
+        }
+
+        private ServiceRequestNode RotateRight(ServiceRequestNode h)
+        {
+            ServiceRequestNode x = h.Left;
+            h.Left = x.Right;
+            x.Right = h;
+            x.IsRed = h.IsRed;
+            h.IsRed = true;
+            return x;
+        }
+
+        private void FlipColors(ServiceRequestNode h)
+        {
+            h.IsRed = true;
+            h.Left.IsRed = false;
+            h.Right.IsRed = false;
         }
 
         public override ServiceRequest Find(string requestId)
         {
             ServiceRequest result = null;
-            _performanceTracker.TrackOperation("BST", "Search", nodeCount, () =>
+            _performanceTracker.TrackOperation("RB", "Search", nodeCount, () =>
             {
                 result = FindRec(root, requestId)?.Data;
             });
@@ -58,23 +101,6 @@ namespace MunicipalServices.Core.DataStructures
             return comparison < 0 
                 ? FindRec(node.Left, requestId) 
                 : FindRec(node.Right, requestId);
-        }
-
-        public IEnumerable<ServiceRequest> GetAll()
-        {
-            var result = new List<ServiceRequest>();
-            InOrderTraversal(root, result);
-            return result;
-        }
-
-        private void InOrderTraversal(ServiceRequestNode node, List<ServiceRequest> result)
-        {
-            if (node != null)
-            {
-                InOrderTraversal(node.Left, result);
-                result.Add(node.Data);
-                InOrderTraversal(node.Right, result);
-            }
         }
     }
 }

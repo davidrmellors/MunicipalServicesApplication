@@ -2,9 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using MunicipalServices.Core.DataStructures;
+using MunicipalServices.Core.Services;
 using MunicipalServices.Models;
 
 namespace MunicipalServicesApplication.Views
@@ -12,40 +14,64 @@ namespace MunicipalServicesApplication.Views
     public partial class ServiceRequestStatusView : UserControl
     {
         public event EventHandler BackToMainRequested;
-        private readonly ServiceRequestBST requestsBST;
+        private readonly ServiceRequestManager _requestManager;
 
         public ServiceRequestStatusView()
         {
             InitializeComponent();
-            requestsBST = new ServiceRequestBST();
+            _requestManager = new ServiceRequestManager(DataManager.Instance);
             SearchRequestId.TextChanged += SearchRequestId_TextChanged;
             UpdateRequestsDisplay();
         }
 
         private void UpdateRequestsDisplay()
         {
-            var requests = requestsBST.GetAll();
-            if (!requests.Any())
+            try
             {
-                RequestsItemsControl.ItemsSource = null;
-                return;
+                var allRequests = DatabaseService.Instance.GetAllRequests();
+                
+                // Load attachments for each request
+                foreach (var request in allRequests)
+                {
+                    request.Attachments = DatabaseService.Instance.GetAttachmentsForRequest(request.RequestId);
+                }
+                
+                RequestsItemsControl.ItemsSource = allRequests.OrderByDescending(r => r.Priority);
             }
-            RequestsItemsControl.ItemsSource = requests;
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading requests: {ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void SearchRequestId_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string searchText = SearchRequestId.Text.ToLower();
+            string searchText = SearchRequestId.Text;
             if (string.IsNullOrWhiteSpace(searchText))
             {
                 UpdateRequestsDisplay();
                 return;
             }
 
-            var requests = requestsBST.GetAll()
-                .Where(r => r.RequestId.ToLower().Contains(searchText))
-                .ToList();
-            RequestsItemsControl.ItemsSource = requests;
+            try
+            {
+                var allRequests = DatabaseService.Instance.GetAllRequests();
+                
+                // Load attachments for each request
+                foreach (var request in allRequests)
+                {
+                    request.Attachments = DatabaseService.Instance.GetAttachmentsForRequest(request.RequestId);
+                }
+                
+                var filteredRequests = allRequests.Where(r => r.MatchesSearch(searchText));
+                RequestsItemsControl.ItemsSource = filteredRequests;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error searching requests: {ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ViewAttachment_Click(object sender, RoutedEventArgs e)
@@ -54,9 +80,8 @@ namespace MunicipalServicesApplication.Views
             {
                 try
                 {
-                    byte[] fileBytes = Convert.FromBase64String(attachment.Content);
                     string tempFilePath = Path.Combine(Path.GetTempPath(), attachment.Name);
-                    File.WriteAllBytes(tempFilePath, fileBytes);
+                    File.WriteAllBytes(tempFilePath, attachment.Content);
 
                     var psi = new ProcessStartInfo
                     {
@@ -73,9 +98,41 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+        private void CopyRequestId_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.DataContext is ServiceRequest request)
+            {
+                bool success = false;
+                int retryCount = 3;
+                while (!success && retryCount > 0)
+                {
+                    try
+                    {
+                        Clipboard.SetText(request.RequestId);
+                        success = true;
+                        MessageBox.Show("Request ID copied to clipboard!", "Success",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (COMException)
+                    {
+                        retryCount--;
+                        System.Threading.Thread.Sleep(100); // Wait a bit before retrying
+                    }
+                }
+
+                if (!success)
+                {
+                    MessageBox.Show("Failed to copy Request ID to clipboard. Please try again.", "Error",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+
         private void BackToMain_Click(object sender, RoutedEventArgs e)
         {
             BackToMainRequested?.Invoke(this, EventArgs.Empty);
         }
+
     }
 }

@@ -17,7 +17,6 @@
         <SolidColorBrush x:Key="PrimaryColor" Color="#007A4D"/>
         <SolidColorBrush x:Key="SecondaryColor" Color="#4A4A4A"/>
         <SolidColorBrush x:Key="AccentColor" Color="#003399"/>
-        <services:SvgToImageSourceConverter x:Key="SvgToImageSourceConverter"/>
         <LinearGradientBrush x:Key="BackgroundGradient" StartPoint="0,0" EndPoint="1,1">
             <GradientStop Color="#F0F0F0" Offset="0"/>
             <GradientStop Color="#E0E0E0" Offset="1"/>

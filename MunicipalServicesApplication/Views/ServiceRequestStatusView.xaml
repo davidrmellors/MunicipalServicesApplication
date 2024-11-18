@@ -77,6 +77,7 @@
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
 
                                         <!-- Header -->
@@ -88,25 +89,32 @@
 
                                             <StackPanel>
                                                 <TextBlock Text="{Binding Category}" 
-                             FontSize="18" 
-                             FontWeight="Bold"
-                             Foreground="{StaticResource PrimaryColor}"/>
+                                                         FontSize="18" 
+                                                         FontWeight="Bold"
+                                                         Foreground="{StaticResource PrimaryColor}"/>
                                                 <TextBlock Text="{Binding Location}"
-                             FontSize="14"
-                             Foreground="{StaticResource SecondaryColor}"/>
+                                                         FontSize="14"
+                                                         Foreground="{StaticResource SecondaryColor}"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                <TextBlock Text="ID: " 
+                                                         Foreground="{StaticResource SecondaryColor}"/>
+                                                <TextBlock Text="{Binding RequestId}"
+                                                         Foreground="{StaticResource SecondaryColor}"/>
                                             </StackPanel>
                                         </Grid>
 
                                         <!-- Description -->
                                         <TextBlock Grid.Row="1" 
-                      Text="{Binding Description}"
-                      TextWrapping="Wrap"
-                      Margin="0,16,0,0"/>
+                                                Text="{Binding Description}"
+                                                TextWrapping="Wrap"
+                                                Margin="0,16,0,0"/>
 
                                         <!-- Attachments -->
                                         <ItemsControl Grid.Row="2" 
-                         ItemsSource="{Binding Attachments}"
-                         Margin="0,16,0,0">
+                                                    ItemsSource="{Binding Attachments}"
+                                                    Margin="0,16,0,0">
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>
                                                     <WrapPanel/>
@@ -115,16 +123,45 @@
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Button Style="{StaticResource MaterialDesignOutlinedButton}"
-                                Margin="0,0,8,8"
-                                Click="ViewAttachment_Click">
+                                                            Margin="0,0,8,8"
+                                                            Click="ViewAttachment_Click">
                                                         <StackPanel Orientation="Horizontal">
-                                                            <materialDesign:PackIcon Kind="Attachment" Margin="0,0,8,0"/>
+                                                            <materialDesign:PackIcon Kind="Attachment" 
+                                                                                Margin="0,0,8,0"/>
                                                             <TextBlock Text="{Binding Name}"/>
                                                         </StackPanel>
                                                     </Button>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
+
+                                        <!-- Status and Priority -->
+                                        <Grid Grid.Row="3" Margin="0,16,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <Border Background="{StaticResource PrimaryColor}" 
+                                                    CornerRadius="4" 
+                                                    Padding="8,4">
+                                                <TextBlock Text="{Binding Status}" 
+                                                         Foreground="White"/>
+                                            </Border>
+                                            
+                                            <Border Grid.Column="2" 
+                                                    Background="{StaticResource AccentColor}" 
+                                                    CornerRadius="4" 
+                                                    Padding="8,4">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Priority: " 
+                                                             Foreground="White"/>
+                                                    <TextBlock Text="{Binding Priority}" 
+                                                             Foreground="White"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
                                     </Grid>
                                 </materialDesign:Card>
                             </DataTemplate>

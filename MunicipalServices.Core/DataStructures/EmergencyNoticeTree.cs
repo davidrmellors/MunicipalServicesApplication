@@ -1,9 +1,6 @@
 ﻿using MunicipalServices.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MunicipalServices.Core.DataStructures
 {
@@ -22,29 +19,24 @@ namespace MunicipalServices.Core.DataStructures
             }
         }
 
-
-        private EmergencyNoticeNode BalanceTree(EmergencyNoticeNode node)
+        public void Insert(EmergencyNotice notice)
         {
-            if (node == null) return null;
-
-            // Red-Black Tree balancing
-            if (IsRed(node.Right) && !IsRed(node.Left))
-                node = RotateLeft(node);
-            if (IsRed(node.Left) && IsRed(node.Left.Left))
-                node = RotateRight(node);
-            if (IsRed(node.Left) && IsRed(node.Right))
-                FlipColors(node);
-
-            return node;
+            var node = new EmergencyNoticeNode(notice);
+            root = InsertRec(root, node);
+            root.IsRed = false;
         }
 
-        private int GetSeverityValue(string severity)
+        private EmergencyNoticeNode InsertRec(EmergencyNoticeNode node, EmergencyNoticeNode newNode)
         {
-            if (severity == null) return 0;
-            if (severity.ToLower() == "high") return 3;
-            if (severity.ToLower() == "medium") return 2;
-            if (severity.ToLower() == "low") return 1;
-            return 0;
+            if (node == null) return newNode;
+
+            int comparison = string.Compare(newNode.Data.Title, node.Data.Title);
+            if (comparison < 0)
+                node.Left = InsertRec(node.Left, newNode);
+            else if (comparison > 0)
+                node.Right = InsertRec(node.Right, newNode);
+
+            return BalanceTree(node);
         }
 
         private bool IsRed(EmergencyNoticeNode node)
@@ -79,6 +71,20 @@ namespace MunicipalServices.Core.DataStructures
             h.Right.IsRed = false;
         }
 
+        private EmergencyNoticeNode BalanceTree(EmergencyNoticeNode node)
+        {
+            if (node == null) return null;
+
+            if (IsRed(node.Right) && !IsRed(node.Left))
+                node = RotateLeft(node);
+            if (IsRed(node.Left) && IsRed(node.Left.Left))
+                node = RotateRight(node);
+            if (IsRed(node.Left) && IsRed(node.Right))
+                FlipColors(node);
+
+            return node;
+        }
+
         public IEnumerable<EmergencyNotice> GetAll()
         {
             var result = new List<EmergencyNotice>();
@@ -95,6 +101,5 @@ namespace MunicipalServices.Core.DataStructures
                 InOrderTraversal(node.Right, result);
             }
         }
-
     }
 }

@@ -11,6 +11,7 @@ namespace MunicipalServicesApplication.Views
             InitializeComponent();
         }
 
+
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             string idNumber = TxtIdNumber.Text.Trim();

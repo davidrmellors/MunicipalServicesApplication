@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MunicipalServicesApplicatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MunicipalServices.Core", "MunicipalServices.Core\MunicipalServices.Core.csproj", "{6E7ECC5A-D3E3-427D-9F0D-3496CC675853}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MunicipalServices.Data", "MunicipalServices.Data\MunicipalServices.Data.csproj", "{CA19C946-5E5E-4AE8-B856-AABDEB27DF4E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MunicipalServices.Models", "MunicipalServices.Models\MunicipalServices.Models.csproj", "{EA47E818-D06A-451E-A5AE-C20F65E776FB}"
 EndProject
 Global
@@ -35,14 +33,6 @@ Global
 		{6E7ECC5A-D3E3-427D-9F0D-3496CC675853}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6E7ECC5A-D3E3-427D-9F0D-3496CC675853}.Release|x64.ActiveCfg = Release|Any CPU
 		{6E7ECC5A-D3E3-427D-9F0D-3496CC675853}.Release|x64.Build.0 = Release|Any CPU
-		{CA19C946-5E5E-4AE8-B856-AABDEB27DF4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CA19C946-5E5E-4AE8-B856-AABDEB27DF4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CA19C946-5E5E-4AE8-B856-AABDEB27DF4E}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{CA19C946-5E5E-4AE8-B856-AABDEB27DF4E}.Debug|x64.Build.0 = Debug|Any CPU
-		{CA19C946-5E5E-4AE8-B856-AABDEB27DF4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CA19C946-5E5E-4AE8-B856-AABDEB27DF4E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CA19C946-5E5E-4AE8-B856-AABDEB27DF4E}.Release|x64.ActiveCfg = Release|Any CPU
-		{CA19C946-5E5E-4AE8-B856-AABDEB27DF4E}.Release|x64.Build.0 = Release|Any CPU
 		{EA47E818-D06A-451E-A5AE-C20F65E776FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EA47E818-D06A-451E-A5AE-C20F65E776FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA47E818-D06A-451E-A5AE-C20F65E776FB}.Debug|x64.ActiveCfg = Debug|Any CPU

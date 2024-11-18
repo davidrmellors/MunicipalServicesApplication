@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using MunicipalServices.Core.DataStructures;
+using MunicipalServices.Core.Services;
 using MunicipalServices.Models;
 
 namespace MunicipalServicesApplication.Views
@@ -16,10 +17,14 @@ namespace MunicipalServicesApplication.Views
         private readonly ServiceRequestBST requestsBST;
         private readonly EmergencyNoticeTree noticesTree;
         private readonly ServiceStatusTree statusTree;
-        public DashboardView()
+        private readonly CurrentUser currentUser;
+        private readonly ServiceRequestManager _requestManager;
+
+        public DashboardView(CurrentUser user)
         {
             InitializeComponent();
-            requestsBST = new ServiceRequestBST();
+            currentUser = user;
+            _requestManager = new ServiceRequestManager(DataManager.Instance);
             noticesTree = EmergencyNoticeTree.Instance;
             statusTree = new ServiceStatusTree();
             LoadDashboardData();
@@ -31,6 +36,15 @@ namespace MunicipalServicesApplication.Views
             LoadServiceStatus();
             LoadRecentRequests();
             LoadCommunityStats();
+        }
+
+        private void HandleNewRequest(ServiceRequest request)
+        {
+            _requestManager.ProcessNewRequest(request);
+
+            // Get related requests to show on dashboard
+            var relatedRequests = _requestManager.GetRelatedRequests(request.RequestId);
+            RelatedRequestsControl.ItemsSource = relatedRequests;
         }
 
         private void LoadEmergencyNotices()
@@ -45,10 +59,20 @@ namespace MunicipalServicesApplication.Views
 
         private void LoadRecentRequests()
         {
-            var highPriorityRequests = requestsBST.GetHighestPriorityRequests(5)
-                .OrderByDescending(r => r.RequestId) // Show newest first
-                .ToList();
-            RecentRequestsControl.ItemsSource = highPriorityRequests;
+            try
+            {
+                var allRequests = DatabaseService.Instance.GetAllRequests();
+                var recentRequests = allRequests
+                    .OrderByDescending(r => r.Priority)
+                    .Take(5)
+                    .ToList();
+                RecentRequestsControl.ItemsSource = recentRequests;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading recent requests: {ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void CopyRequestId_Click(object sender, RoutedEventArgs e)
@@ -63,12 +87,25 @@ namespace MunicipalServicesApplication.Views
 
         private void LoadCommunityStats()
         {
+            var allRequests = DatabaseService.Instance.GetAllRequests();
             var stats = new[]
             {
-                new CommunityStat { Label = "Active Requests", Value = requestsBST.CountByStatus("Pending").ToString() },
-                new CommunityStat { Label = "Resolved This Week", Value = requestsBST.CountByStatus("Resolved").ToString() }
+                new CommunityStat {
+                    Label = "Active Requests",
+                    Value = allRequests.Count(r => r.Status == "Pending").ToString()
+                },
+                new CommunityStat {
+                    Label = "Resolved This Week",
+                    Value = allRequests.Count(r => r.Status == "Resolved" &&
+                                                   r.SubmissionDate >= DateTime.Now.AddDays(-7)).ToString()
+                }
             };
             StatsControl.ItemsSource = stats;
+        }
+
+        public void RefreshData()
+        {
+            LoadDashboardData();
         }
 
         private void BtnEvents_Click(object sender, RoutedEventArgs e)
@@ -84,6 +121,11 @@ namespace MunicipalServicesApplication.Views
         private void BtnStatus_Click(object sender, RoutedEventArgs e)
         {
             NavigationRequested?.Invoke(this, "Status");
+        }
+
+        private void BtnPerformance_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationRequested?.Invoke(this, "Performance");
         }
 
         private void BtnExit_Click(object sender, RoutedEventArgs e)

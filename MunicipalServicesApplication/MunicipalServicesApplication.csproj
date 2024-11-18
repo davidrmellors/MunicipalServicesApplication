@@ -248,10 +248,6 @@
       <Project>{6e7ecc5a-d3e3-427d-9f0d-3496cc675853}</Project>
       <Name>MunicipalServices.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MunicipalServices.Data\MunicipalServices.Data.csproj">
-      <Project>{ca19c946-5e5e-4ae8-b856-aabdeb27df4e}</Project>
-      <Name>MunicipalServices.Data</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MunicipalServices.Models\MunicipalServices.Models.csproj">
       <Project>{ea47e818-d06a-451e-a5ae-c20f65e776fb}</Project>
       <Name>MunicipalServices.Models</Name>

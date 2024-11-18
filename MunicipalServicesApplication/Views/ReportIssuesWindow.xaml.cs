@@ -6,6 +6,11 @@ using Microsoft.Win32;
 using System.Windows.Controls;
 using MunicipalServices.Models;
 using MunicipalServices.Core.DataStructures;
+using MunicipalServices.Core.Services;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace MunicipalServicesApplication.Views
 {
@@ -13,12 +18,89 @@ namespace MunicipalServicesApplication.Views
     {
         private List<Attachment> attachments = new List<Attachment>();
         public event EventHandler BackToMainRequested;
-        private readonly ServiceRequestBST requestsBST;
+        private readonly CurrentUser currentUser;
+        private double selectedLatitude;
+        private double selectedLongitude;
+        private string formattedAddress;
+        private readonly GooglePlacesService placesService;
+        private readonly ServiceRequestManager _requestManager;
 
-        public ReportIssuesWindow()
+        public ReportIssuesWindow(CurrentUser user)
         {
             InitializeComponent();
-            requestsBST = new ServiceRequestBST();
+            attachments = new List<Attachment>();
+            currentUser = user;
+            placesService = new GooglePlacesService("AIzaSyA-_iYlhhs3iy-tPW33ScC7wDMO5qUAnFE");
+            
+            selectedLatitude = 0;
+            selectedLongitude = 0;
+            formattedAddress = string.Empty;
+            _requestManager = new ServiceRequestManager(DataManager.Instance);
+        }
+
+        private async void Location_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (LocationSuggestionsList == null) return;
+            
+            if (string.IsNullOrWhiteSpace(TxtLocation.Text) || TxtLocation.Text == "Enter Location")
+            {
+                LocationSuggestionsList.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            if (LocationSuggestionsList.SelectedItem != null)
+            {
+                LocationSuggestionsList.SelectedItem = null;
+                return;
+            }
+
+            try
+            {
+
+                var predictions = await placesService.GetPlacePredictions(TxtLocation.Text);
+                if (predictions != null && predictions.Any())
+                {
+                    LocationSuggestionsList.ItemsSource = predictions;
+                    LocationSuggestionsList.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    LocationSuggestionsList.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error getting location predictions: {ex.Message}");
+                LocationSuggestionsList.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        
+
+        private async void LocationSuggestion_Selected(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedItem = LocationSuggestionsList.SelectedItem;
+            if (selectedItem is PlacePrediction prediction)
+            {
+                try
+                {
+                    
+                    var placeDetails = await placesService.GetPlaceDetails(prediction.PlaceId);
+                    
+                    selectedLatitude = placeDetails.Latitude;
+                    selectedLongitude = placeDetails.Longitude;
+                    formattedAddress = placeDetails.FormattedAddress;
+                    
+                    TxtLocation.Text = prediction.Description;
+                    LocationSuggestionsList.Visibility = Visibility.Collapsed;
+                    
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error getting location details: {ex.Message}", "Error",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private void AttachFiles_Click(object sender, RoutedEventArgs e)
@@ -34,12 +116,12 @@ namespace MunicipalServicesApplication.Views
                     try
                     {
                         byte[] fileBytes = File.ReadAllBytes(filename);
-                        string base64String = Convert.ToBase64String(fileBytes);
-                        attachments.Add(new Attachment { Name = Path.GetFileName(filename), Content = base64String });
+                        attachments.Add(new Attachment { Name = Path.GetFileName(filename), Content = fileBytes });
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Error attaching file {filename}: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show($"Error attaching file {filename}: {ex.Message}", "Error", MessageBoxButton.OK,
+                            MessageBoxImage.Error);
                     }
                 }
                 UpdateAttachmentCount();
@@ -53,9 +135,9 @@ namespace MunicipalServicesApplication.Views
 
         private void SubmitButton_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(TxtLocation.Text) ||
-                CmbCategory.SelectedItem == null ||
-                string.IsNullOrWhiteSpace(TxtDescription.Text))
+            if (string.IsNullOrWhiteSpace(TxtLocation.Text) || TxtLocation.Text == "Enter Location" ||
+                string.IsNullOrWhiteSpace(TxtDescription.Text) || TxtDescription.Text == "Enter Description" ||
+                CmbCategory.SelectedItem == null)
             {
                 MessageBox.Show("Please fill in all required fields.", "Validation Error",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -65,19 +147,23 @@ namespace MunicipalServicesApplication.Views
             var request = new ServiceRequest
             {
                 RequestId = GenerateRequestId(),
-                Location = TxtLocation.Text,
+                Location = formattedAddress ?? TxtLocation.Text,
                 Category = (CmbCategory.SelectedItem as ComboBoxItem).Content.ToString(),
                 Description = TxtDescription.Text,
-                Attachments = new List<Attachment>(attachments)
+                Attachments = new List<Attachment>(attachments),
+                Latitude = selectedLatitude,
+                Longitude = selectedLongitude
             };
 
             request.CalculatePriority();
-            requestsBST.Insert(request);
+
+            _requestManager.ProcessNewRequest(request);
 
             MessageBox.Show($"Service request submitted successfully!\nRequest ID: {request.RequestId}",
                 "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
             ClearForm();
+            BackToMainRequested?.Invoke(this, EventArgs.Empty);
         }
 
         private string GenerateRequestId()
@@ -116,5 +202,7 @@ namespace MunicipalServicesApplication.Views
         {
             BackToMainRequested?.Invoke(this, EventArgs.Empty);
         }
+
+
     }
 }
