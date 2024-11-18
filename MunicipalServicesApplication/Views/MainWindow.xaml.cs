@@ -19,7 +19,11 @@ namespace MunicipalServicesApplication.Views
         {
             InitializeComponent();
             _userService = new UserProfileService();
-            _ = InitializeApplicationAsync();
+            
+            // Show dashboard immediately
+            _dashboardView = new DashboardView(App.CurrentUser);
+            _dashboardView.NavigationRequested += OnNavigationRequested;
+            SwitchView(_dashboardView);
         }
 
         private async Task InitializeApplicationAsync()
@@ -63,9 +67,14 @@ namespace MunicipalServicesApplication.Views
 
         private void SwitchView(UserControl newView)
         {
+            // Create the new view immediately
+            MainContent.Children.Clear();
+            MainContent.Children.Add(newView);
+            _currentView = newView;
+
+            // Wire up navigation events
             if (newView != _dashboardView)
             {
-                // Wire up navigation for other views
                 if (newView is LocalEventsWindow eventsWindow)
                 {
                     eventsWindow.BackToMainRequested += (s, e) => SwitchView(_dashboardView);
@@ -80,10 +89,11 @@ namespace MunicipalServicesApplication.Views
                 }
             }
 
-            _dashboardView.RefreshData();
-            MainContent.Children.Clear();
-            MainContent.Children.Add(newView);
-            _currentView = newView;
+            // Refresh dashboard data in background when returning
+            if (newView == _dashboardView)
+            {
+                _ = Task.Run(async () => await _dashboardView.RefreshData());
+            }
         }
 
     }

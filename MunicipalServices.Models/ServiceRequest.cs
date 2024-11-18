@@ -13,18 +13,28 @@ namespace MunicipalServices.Models
         public string Location { get; set; }
         public string Status { get; set; }
         public DateTime SubmissionDate { get; set; }
-        public int Priority { get; private set; }
+        public DateTime? ResolvedDate { get; set; }
+        private int _priority;
+        public int Priority
+        {
+            get => _priority;
+            set
+            {
+                if (_priority != value)
+                {
+                    _priority = value;
+                    OnPropertyChanged(nameof(Priority));
+                }
+            }
+        }
         private List<Attachment> _attachments;
         public List<Attachment> Attachments
         {
-            get => _attachments ?? (_attachments = new List<Attachment>());
+            get => _attachments;
             set
             {
-                if (_attachments != value)
-                {
-                    _attachments = value;
-                    OnPropertyChanged(nameof(Attachments));
-                }
+                _attachments = value;
+                OnPropertyChanged(nameof(Attachments));
             }
         }
         public string Type { get; set; }
@@ -33,15 +43,34 @@ namespace MunicipalServices.Models
         public double Longitude { get; set; }
         public string FormattedAddress { get; set; }
 
-        public IEnumerable<ServiceRequest> RelatedIssues { get; set; }
+        private List<ServiceRequest> _relatedIssues;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public List<ServiceRequest> RelatedIssues
+        {
+            get => _relatedIssues;
+            set
+            {
+                _relatedIssues = value;
+                OnPropertyChanged(nameof(RelatedIssues));
+            }
+        }
+
+        public Coordinates Coordinates => new Coordinates 
+        { 
+            Latitude = this.Latitude, 
+            Longitude = this.Longitude 
+        };
+
+        public DateTime CreatedDate => SubmissionDate;
 
         private static int counter = 0;
         private static readonly object lockObject = new object();
 
         public ServiceRequest()
         {
-            RelatedIssues = new List<ServiceRequest>();
+            _relatedIssues = new List<ServiceRequest>();
             lock (lockObject)
             {
                 counter++;
@@ -96,9 +125,7 @@ namespace MunicipalServices.Models
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged(string propertyName)
+        protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

@@ -10,6 +10,7 @@ namespace MunicipalServices.Models
     {
         public string Service { get; set; }
         public string Status { get; set; }
-        public DateTime LastUpdated { get; set; } = DateTime.Now;
+        public string StatusColor { get; set; }
+        public int Count { get; set; }
     }
 }

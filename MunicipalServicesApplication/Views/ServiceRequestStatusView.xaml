@@ -59,153 +59,124 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Image Source="../Resources/zaCoatOfArms.ico" Height="60" Margin="0,0,20,0"/>
-            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="Service Request Status" FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryColor}"/>
-            </StackPanel>
+            
+            <DockPanel Grid.Column="1" VerticalAlignment="Center">
+                <materialDesign:PackIcon Kind="ClipboardSearch" 
+                                       Foreground="{StaticResource PrimaryColor}" 
+                                       Width="32" 
+                                       Height="32"
+                                       Margin="10,0,16,0"
+                                       VerticalAlignment="Center"/>
+                <StackPanel>
+                    <TextBlock Text="Service Request Status" 
+                              FontSize="24" 
+                              FontWeight="Bold" 
+                              Foreground="{StaticResource PrimaryColor}"/>
+                    <TextBlock Text="Track and manage your service requests" 
+                              Foreground="{StaticResource SecondaryColor}"
+                              FontSize="14"
+                              Margin="0,4,0,0"/>
+                </StackPanel>
+            </DockPanel>
+            
+            <Image Grid.Column="2" 
+                   Source="../Resources/zaCoatOfArms.ico" 
+                   Height="60" 
+                   Margin="16,10,10,10"/>
         </Grid>
 
         <!-- Search Section -->
         <materialDesign:Card Grid.Row="2" Margin="20" UniformCornerRadius="8">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="16">
-                    <!-- Add this search panel -->
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <TextBox x:Name="SearchRequestId"
-                                materialDesign:HintAssist.Hint="Search by Request ID"
-                                Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                Margin="0,0,8,0"/>
-                        
-                        <Button Grid.Column="1"
-                                Content="Search"
-                                Click="SearchButton_Click"
-                                Style="{StaticResource MaterialDesignRaisedButton}"/>
-                    </Grid>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                    <!-- Add this details panel -->
-                    <materialDesign:Card x:Name="RequestDetailsPanel" 
-                                       Margin="0,0,0,16" 
-                                       UniformCornerRadius="8"
-                                       Visibility="{Binding DataContext, RelativeSource={RelativeSource Self}, 
-                                                  Converter={StaticResource NullToVisibilityConverter}}">
-                        <Grid Margin="16">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
+                <!-- Search Panel -->
+                <TextBox Grid.Row="0"
+                        x:Name="SearchRequestId"
+                        materialDesign:HintAssist.Hint="Search by Request ID"
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        Margin="40,20,40,20"/>
 
-                            <TextBlock Text="Request Details" 
-                                     FontSize="18" 
-                                     FontWeight="Bold"
-                                     Foreground="{StaticResource PrimaryColor}"/>
+                <!-- Request List -->
+                <ScrollViewer Grid.Row="1" 
+                            x:Name="MainScrollViewer"
+                            VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="40,0,40,20">
+                        <ItemsControl x:Name="RequestsItemsControl">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <materialDesign:Card Margin="0,0,0,16" UniformCornerRadius="8">
+                                        <Grid Margin="24,16">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
 
-                            <StackPanel Grid.Row="1" Margin="0,8,0,0">
-                                <TextBlock Text="{Binding RequestId, StringFormat='Request ID: {0}'}"
-                                         Margin="0,4"/>
-                                <TextBlock Text="{Binding Category, StringFormat='Category: {0}'}"
-                                         Margin="0,4"/>
-                                <TextBlock Text="{Binding Description, StringFormat='Description: {0}'}"
-                                         Margin="0,4"
-                                         TextWrapping="Wrap"/>
-                                <TextBlock Text="{Binding Location, StringFormat='Location: {0}'}"
-                                         Margin="0,4"/>
-                                <TextBlock Text="{Binding Status, StringFormat='Status: {0}'}"
-                                         Margin="0,4"/>
-                                <TextBlock Text="{Binding Priority, StringFormat='Priority: {0}'}"
-                                         Margin="0,4"/>
-                            </StackPanel>
-                        </Grid>
-                    </materialDesign:Card>
+                                            <!-- Header Section -->
+                                            <DockPanel Grid.Row="0">
+                                                <TextBlock Text="{Binding RequestId}" 
+                                                         FontFamily="Consolas"
+                                                         Foreground="{StaticResource SecondaryColor}"
+                                                         DockPanel.Dock="Right"/>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Category}" 
+                                                             FontSize="20" 
+                                                             FontWeight="SemiBold"
+                                                             Foreground="{StaticResource PrimaryColor}"/>
+                                                    <TextBlock Text="{Binding Location}"
+                                                             FontSize="14"
+                                                             Foreground="{StaticResource SecondaryColor}"/>
+                                                </StackPanel>
+                                            </DockPanel>
 
-                    <!-- Existing ItemsControl -->
-                    <ItemsControl x:Name="RequestsItemsControl">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <materialDesign:Card Margin="0,0,0,16" UniformCornerRadius="8">
-                                    <Grid Margin="16">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
+                                            <!-- Description -->
+                                            <TextBlock Grid.Row="1" 
+                                                    Text="{Binding Description}"
+                                                    TextWrapping="Wrap"
+                                                    Margin="0,16,0,0"/>
 
-                                        <!-- Header Section -->
-                                        <DockPanel Grid.Row="0">
-                                            <StackPanel DockPanel.Dock="Left">
-                                                <TextBlock Text="{Binding Category}" 
-                                                         FontSize="20" 
-                                                         FontWeight="SemiBold"
-                                                         Foreground="{StaticResource PrimaryColor}"/>
-                                                <TextBlock Text="{Binding Location}"
-                                                         FontSize="14"
-                                                         Margin="0,4,0,0"
-                                                         Foreground="{StaticResource SecondaryColor}"/>
-                                            </StackPanel>
-                                            
-                                            <StackPanel DockPanel.Dock="Right" 
-                                                      HorizontalAlignment="Right"
-                                                      Orientation="Horizontal"
-                                                      Margin="16,0,0,0">
-                                                <Button Style="{StaticResource MaterialDesignOutlinedButton}"
-                                                        Margin="0,0,8,0"
-                                                        Click="CopyRequestId_Click">
+                                            <!-- Status and Priority Bar -->
+                                            <Grid Grid.Row="2" Margin="0,16,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <Border Background="{StaticResource PrimaryColor}" 
+                                                        CornerRadius="4" 
+                                                        Padding="12,6">
+                                                    <TextBlock Text="{Binding Status}" 
+                                                             Foreground="White"/>
+                                                </Border>
+
+                                                <Border Grid.Column="2" 
+                                                        Background="{StaticResource AccentColor}" 
+                                                        CornerRadius="4" 
+                                                        Padding="12,6">
+                                                    <TextBlock Text="{Binding Priority, StringFormat='Priority: {0}'}"
+                                                             Foreground="White"/>
+                                                </Border>
+                                            </Grid>
+
+                                            <!-- Attachments Expander -->
+                                            <Expander Grid.Row="3" 
+                                                            x:Name="AttachmentsExpander"
+                                                            Margin="0,8,0,0"
+                                                            BorderThickness="0"
+                                                            Background="Transparent"
+                                                            Expanded="Expander_Expanded">
+                                                <Expander.Header>
                                                     <StackPanel Orientation="Horizontal">
-                                                        <materialDesign:PackIcon Kind="ContentCopy" 
-                                                                               Margin="0,0,8,0"/>
-                                                        <TextBlock Text="{Binding RequestId}"/>
-                                                    </StackPanel>
-                                                </Button>
-                                            </StackPanel>
-                                        </DockPanel>
-
-                                        <!-- Description -->
-                                        <TextBlock Grid.Row="1" 
-                                                Text="{Binding Description}"
-                                                TextWrapping="Wrap"
-                                                Margin="0,16,0,0"/>
-
-                                        <!-- Status and Priority Bar -->
-                                        <Grid Grid.Row="2" Margin="0,16,0,0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Border Background="{StaticResource PrimaryColor}" 
-                                                    CornerRadius="4" 
-                                                    Padding="12,6">
-                                                <TextBlock Text="{Binding Status}" 
-                                                         Foreground="White"/>
-                                            </Border>
-
-                                            <StackPanel Grid.Column="1" 
-                                                        Orientation="Horizontal" 
-                                                        HorizontalAlignment="Left" 
-                                                        Margin="16,0">
-                                                <!-- Related Issues Button -->
-                                                <Button Content="View Related Issues"
-                                                        Click="ViewRelatedRequests_Click"
-                                                        Style="{StaticResource MaterialDesignFlatButton}"/>
-                                                
-                                                <!-- Attachments Button - Only show if there are attachments -->
-                                                <Button Margin="8,0,0,0"
-                                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                                        Click="ViewAttachmentsExpander_Click"
-                                                        Visibility="{Binding Attachments.Count, Converter={StaticResource NumberToVisibilityConverter}}"
-                                                        x:Name="AttachmentsButton">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <materialDesign:PackIcon Kind="Attachment" Margin="0,0,8,0"/>
-                                                        <TextBlock>
+                                                        <materialDesign:PackIcon Kind="Attachment" 
+                                                                                   Margin="0,0,8,0"/>
+                                                        <TextBlock Foreground="{StaticResource PrimaryColor}">
                                                             <TextBlock.Text>
                                                                 <MultiBinding StringFormat="{}{0} Attachment(s)">
                                                                     <Binding Path="Attachments.Count"/>
@@ -213,88 +184,151 @@
                                                             </TextBlock.Text>
                                                         </TextBlock>
                                                     </StackPanel>
-                                                </Button>
-                                            </StackPanel>
+                                                </Expander.Header>
+                                                <Expander.Content>
+                                                    <Grid>
+                                                        <!-- No Attachments Message -->
+                                                        <TextBlock Text="No attachments found for this request."
+                                                                  Margin="0,8,0,0"
+                                                                  Foreground="{StaticResource SecondaryColor}"
+                                                                  TextAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Attachments.Count}" Value="0">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        
+                                                        <!-- Existing ItemsControl for attachments -->
+                                                        <ItemsControl ItemsSource="{Binding Attachments}">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Button Margin="0,4"
+                                                                            Click="ViewAttachment_Click"
+                                                                            Style="{StaticResource MaterialDesignOutlinedButton}">
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <materialDesign:PackIcon Kind="File" Margin="0,0,8,0"/>
+                                                                            <TextBlock Text="{Binding Name}"/>
+                                                                        </StackPanel>
+                                                                    </Button>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </Grid>
+                                                </Expander.Content>
+                                            </Expander>
 
-                                            <Border Grid.Column="2" 
-                                                    Background="{StaticResource AccentColor}" 
-                                                    CornerRadius="4" 
-                                                    Padding="12,6">
-                                                <TextBlock Text="{Binding Priority, StringFormat='Priority: {0}'}"
-                                                         Foreground="White"/>
-                                            </Border>
+                                            <!-- Related Issues Expander -->
+                                            <Expander Grid.Row="4" 
+                                                            Margin="0,8,0,0"
+                                                            BorderThickness="0"
+                                                            Background="Transparent"
+                                                            Expanded="Expander_Expanded">
+                                                <Expander.Header>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <materialDesign:PackIcon Kind="Link" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="Related Issues" 
+                                                                  Foreground="{StaticResource PrimaryColor}"/>
+                                                    </StackPanel>
+                                                </Expander.Header>
+                                                <Grid>
+                                                    <!-- No Related Issues Message -->
+                                                    <TextBlock Text="No related issues found for this request."
+                                                              Margin="0,8,0,0"
+                                                              Foreground="{StaticResource SecondaryColor}"
+                                                              TextAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding RelatedIssues.Count}" Value="0">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    
+                                                    <!-- Related Issues List -->
+                                                    <ItemsControl ItemsSource="{Binding RelatedIssues}">
+                                                        <ItemsControl.Style>
+                                                            <Style TargetType="ItemsControl">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding RelatedIssues.Count}" Value="0">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </ItemsControl.Style>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <materialDesign:Card Margin="0,4" UniformCornerRadius="4">
+                                                                    <StackPanel Margin="12,8">
+                                                                        <DockPanel>
+                                                                            <TextBlock Text="{Binding RequestId}" 
+                                                                                     FontFamily="Consolas"
+                                                                                     Foreground="{StaticResource SecondaryColor}"
+                                                                                     DockPanel.Dock="Right"/>
+                                                                            <TextBlock>
+                                                                                <Run Text="{Binding Category}" FontWeight="SemiBold"/>
+                                                                                <Run Text=" - "/>
+                                                                                <Run Text="{Binding Location}"/>
+                                                                            </TextBlock>
+                                                                        </DockPanel>
+                                                                        <TextBlock Text="{Binding Description}" 
+                                                                                 TextWrapping="Wrap"
+                                                                                 Margin="0,4,0,0"/>
+                                                                        <TextBlock>
+                                                                            <Run Text="Status: "/>
+                                                                            <Run Text="{Binding Status, Mode=OneWay}"/>
+                                                                            <Run Text=" | Priority: "/>
+                                                                            <Run Text="{Binding Priority, Mode=OneWay}"/>
+                                                                        </TextBlock>
+                                                                    </StackPanel>
+                                                                </materialDesign:Card>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </Grid>
+                                            </Expander>
                                         </Grid>
+                                    </materialDesign:Card>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
 
-                                        <!-- Attachments Expander -->
-                                        <Expander Grid.Row="3" 
-                                                        x:Name="AttachmentsExpander"
-                                                        Header="Attachments"
-                                                        Margin="0,8,0,0"
-                                                        BorderThickness="0"
-                                                        Background="Transparent">
-                                            <ItemsControl ItemsSource="{Binding Attachments}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Button Margin="0,4"
-                                                                Click="ViewAttachment_Click"
-                                                                Style="{StaticResource MaterialDesignOutlinedButton}">
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <materialDesign:PackIcon Kind="File" Margin="0,0,8,0"/>
-                                                                <TextBlock Text="{Binding Name}"/>
-                                                            </StackPanel>
-                                                        </Button>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </Expander>
-
-                                        <!-- Related Issues Expander -->
-                                        <Expander Grid.Row="4" 
-                                                        Header="Related Issues"
-                                                        Margin="0,8,0,0"
-                                                        BorderThickness="0"
-                                                        Background="Transparent">
-                                            <ItemsControl ItemsSource="{Binding RelatedIssues}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <materialDesign:Card Margin="0,8,0,0" 
-                                                                           UniformCornerRadius="4">
-                                                            <Grid Margin="16,12">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <StackPanel>
-                                                                    <TextBlock Text="{Binding Category}" 
-                                                                             FontWeight="SemiBold"/>
-                                                                    <TextBlock Text="{Binding Description}" 
-                                                                             TextWrapping="Wrap"
-                                                                             Margin="0,4,0,0"/>
-                                                                    <TextBlock Text="{Binding Status}" 
-                                                                             Foreground="{StaticResource SecondaryColor}"
-                                                                             Margin="0,4,0,0"/>
-                                                                </StackPanel>
-                                                                <Border Grid.Column="1" 
-                                                                        Background="{StaticResource AccentColor}" 
-                                                                        CornerRadius="4" 
-                                                                        Padding="8,4"
-                                                                        Margin="16,0,0,0">
-                                                                    <TextBlock Text="{Binding Priority, StringFormat='Priority: {0}'}"
-                                                                             Foreground="White"/>
-                                                                </Border>
-                                                            </Grid>
-                                                        </materialDesign:Card>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </Expander>
-                                    </Grid>
-                                </materialDesign:Card>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </ScrollViewer>
+                <!-- Loading Overlay -->
+                <materialDesign:Card 
+                    Grid.RowSpan="2"
+                    x:Name="LoadingOverlay"
+                    Background="#80FFFFFF"
+                    Visibility="Collapsed"
+                    UniformCornerRadius="8">
+                    <StackPanel 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Margin="16">
+                        <ProgressBar 
+                            Style="{StaticResource MaterialDesignCircularProgressBar}"
+                            Value="0"
+                            IsIndeterminate="True"
+                            Width="48"
+                            Height="48"
+                            Margin="0,0,0,8"/>
+                        <TextBlock 
+                            Text="Loading..."
+                            HorizontalAlignment="Center"
+                            Foreground="{StaticResource PrimaryColor}"/>
+                    </StackPanel>
+                </materialDesign:Card>
+            </Grid>
         </materialDesign:Card>
 
         <!-- Back Button -->

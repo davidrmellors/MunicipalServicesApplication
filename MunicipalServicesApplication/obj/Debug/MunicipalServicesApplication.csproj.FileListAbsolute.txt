@@ -91,3 +91,6 @@ C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplic
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\Municipa.F4AF7ECE.Up2Date
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\MunicipalServicesApplication.exe
 C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\obj\Debug\MunicipalServicesApplication.pdb
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\DotNetEnv.dll
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\Sprache.dll
+C:\Users\David\source\repos\MunicipalServicesApplication\MunicipalServicesApplication\bin\Debug\Sprache.xml

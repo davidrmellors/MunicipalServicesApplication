@@ -17,6 +17,7 @@ The application is designed with a modern user interface, which includes animati
    - They can specify the location, describe the issue in detail, and attach media files (images, etc.).
    - A progress bar dynamically updates as users complete each section of the report.
    - All submitted issues are displayed in a data grid in the main window.
+   - **Address Autocomplete**: Utilizes the Places API for autocomplete suggestions when searching for addresses in the report issue window.
 
 2. **Modern User Interface**
    - The app has a modern, user-friendly interface with smooth animations.
@@ -28,14 +29,25 @@ The application is designed with a modern user interface, which includes animati
 4. **Responsive Design**
    - The application is designed to be responsive with a minimum window size to ensure it works well across different screen resolutions.
 
+5. **Advanced Data Structures Implementation**
+   - **Red-Black Tree**: Ensures O(log n) operations for service request management
+   - **Priority Heap**: Efficiently handles emergency and priority-based requests
+   - **Service Request Graph**: Manages relationships between related service requests
+   - **Service Status Tree**: Provides hierarchical view of service statuses
+   - **Emergency Notice Tree**: Manages critical municipal announcements and alerts
+
 ## Technologies Used
 
 - **Language**: C# (WPF using .NET Framework 4.7.2)
 - **UI Framework**: Windows Presentation Foundation (WPF)
-- **Data Structures**: ObservableCollection, List for handling issues and media attachments
+- **Data Structures**: 
+  - Red-Black Tree for balanced request management
+  - Binary Heap for priority queue implementation
+  - Graph structure for related issues
+  - Service Status Tree for status management
+  - Emergency Notice Tree for managing alerts
+- **API**: Google Places API for address autocomplete
 - **IDE**: Visual Studio
-
----
 
 ## Requirements
 
@@ -44,7 +56,78 @@ To run the **Municipal Services Application**, the following software is require
 - **Windows OS**
 - **Visual Studio** (for development and running the application)
 
----
+## Implementation Details
+
+### 1. Data Structures
+
+#### Red-Black Tree
+- Ensures O(log n) time complexity for insertions and searches
+- Self-balancing for consistent performance
+- Used for efficient service request storage and retrieval
+
+Example usage:
+```csharp
+var requestTree = new RedBlackTree();
+requestTree.Insert(new ServiceRequest { RequestId = "REQ-123" });
+var request = requestTree.Find("REQ-123");
+```
+
+#### Priority Heap
+- Manages priority-based service requests
+- O(log n) insertion and extraction of highest-priority requests
+- Efficient handling of emergency situations
+
+Example usage:
+```csharp
+var requestHeap = new ServiceRequestHeap();
+requestHeap.Insert(new ServiceRequest { 
+    RequestId = "EMERGENCY-123",
+    Priority = 10
+});
+var urgentRequest = requestHeap.ExtractMax();
+```
+
+#### Service Request Graph
+- Tracks relationships between service requests
+- Enables pattern analysis and related issue identification
+- Supports geographical clustering of issues
+
+#### Service Status Tree
+- Manages overall status of municipal services
+- Provides quick status lookups and updates
+- Hierarchical organization of service statuses
+
+#### Emergency Notice Tree
+- Singleton pattern implementation for emergency notifications
+- Manages critical municipal announcements and alerts
+- Provides quick access to emergency notices by severity
+
+Example usage:
+```csharp
+var emergencyTree = EmergencyNoticeTree.Instance;
+emergencyTree.Insert(new EmergencyNotice { 
+    Title = "Water Interruption",
+    Severity = "Warning"
+});
+var notices = emergencyTree.GetAll();
+```
+
+### 2. Performance Considerations
+
+#### Time Complexity
+- Red-Black Tree Operations: O(log n)
+- Priority Heap Operations: O(log n)
+- Graph Operations: O(1) for adjacent lookups
+
+#### Memory Optimization
+- Lazy loading of related data
+- Efficient node structure design
+- Minimal memory overhead in balanced trees
+
+#### Scalability Features
+- Balanced tree structures for consistent performance
+- Priority-based processing for critical issues
+- Graph-based relationship management
 
 ## Getting Started
 
@@ -72,8 +155,6 @@ git clone https://github.com/davidrmellors/MunicipalServicesApplication.git
 1. After the build completes successfully, press **F5** or click the **Start** button to run the application.
 2. The main window will open, presenting options to report an issue or exit the application.
 
----
-
 ## How to Use the Application
 
 ### Main Menu
@@ -87,63 +168,86 @@ git clone https://github.com/davidrmellors/MunicipalServicesApplication.git
 ### Reporting an Issue
 
 1. Click on **Report an Issue** to open the reporting window.
-2. Enter the **location** of the issue (e.g., street name, neighborhood).
+2. Enter the **location** of the issue (e.g., street name, neighborhood). The application will provide autocomplete suggestions using the Google Places API.
 3. Select the **issue category** (e.g., Sanitation, Roads, Utilities) from the dropdown.
 4. Write a **detailed description** of the issue.
 5. If applicable, click **Attach Media** to upload any relevant images or documents that help illustrate the issue.
 6. As you fill out the form, a **progress bar** will update, indicating your progress.
 7. Once all fields are complete, click **Submit** to report the issue. A confirmation message will appear, and the window will close, taking you back to the main menu.
 
-### Viewing Reported Issues
+### Advanced Features
 
-- After submitting an issue, it will appear in the **Reported Issues** section on the main menu.
-- The **data grid** will display the location, category, description, and any attached files for each reported issue.
+1. **Request Processing**
+   - Priority-based handling using heap structure
+   - Efficient request lookup using Red-Black Tree
+   - Related issue detection using graph structure
 
----
+2. **Status Management**
+   - Real-time status updates
+   - Hierarchical status organization
+   - Efficient status lookup and modification
+
+3. **Performance Features**
+   - O(log n) operations for core functionalities
+   - Memory-efficient data structures
+   - Scalable architecture for growing municipalities
 
 ## File Structure
 
-The project follows a structured folder layout to keep things organised:
+The project follows a structured folder layout:
 
 ```
 MunicipalServicesApplication/
-├── Models/
-│   ├── Issue.cs               # Data model for reported issues
+├── MunicipalServices.Core/
+│   ├── DataStructures/
+│   │   ├── DisjointSet.cs
+│   │   ├── EmergencyNoticeNode.cs
+│   │   ├── EmergencyNoticeTree.cs
+│   │   ├── RedBlackTree.cs
+│   │   ├── ServiceRequestBST.cs
+│   │   ├── ServiceRequestGraph.cs
+│   │   ├── ServiceRequestHeap.cs
+│   │   ├── ServiceRequestNode.cs
+│   │   ├── ServiceRequestTree.cs
+│   │   └── ServiceStatusTree.cs
+│   └── Services/
+│       ├── AnnouncementService.cs
+│       ├── DatabaseService.cs
+│       ├── EmergencyManager.cs
+│       ├── EmergencyResponseCoordinator.cs
+│       ├── EventService.cs
+│       └── GooglePlacesService.cs
+├── MunicipalServices.Models/
+│   ├── Announcement.cs
+│   ├── Attachment.cs
+│   ├── CommunityStat.cs
+│   ├── Coordinates.cs
+│   ├── CurrentUser.cs
+│   ├── EmergencyNotice.cs
+│   └── GooglePlacesModel.cs
 ├── Views/
-│   ├── MainWindow.xaml         # Main menu window
-│   ├── ReportIssuesWindow.xaml # Window for reporting issues
-│   ├── MainWindow.xaml.cs      # Logic for main window
-│   ├── ReportIssuesWindow.xaml.cs # Logic for reporting issues window
-├── Resources/
-│   ├── zaFlag.ico              # Application icon
-├── App.xaml                    # Application-level settings
-├── App.xaml.cs                 # Entry point for the application
-├── MunicipalServicesApplication.sln # Visual Studio solution file
-├── README.md                   # Documentation for the project
+│   ├── DashboardView.xaml
+│   ├── LocalEventsWindow.xaml
+│   ├── LoginWindow.xaml
+│   ├── MainWindow.xaml
+│   ├── ReportIssuesWindow.xaml
+│   └── ServiceRequestStatusView.xaml
 ```
 
-### Models
-The `Models` folder contains the **Issue** class, which defines the structure of a reported issue (location, category, description, attachments).
+## Technical Documentation
 
-### Views
-The `Views` folder contains the XAML files and their code-behind logic for the main window and the issue-reporting window.
+For detailed technical documentation about the implementation of data structures and algorithms, please refer to the following files:
 
----
-
-## Customisation
-
-Feel free to customise the following aspects of the application:
-- **ComboBox Style**: Update the ComboBox template in the `ReportIssuesWindow.xaml` to match your preferred design.
-- **Data Grid**: Adjust the appearance of the data grid in the main window for displaying reported issues.
-
----
+- `MunicipalServices.Core/DataStructures/RedBlackTree.cs`
+- `MunicipalServices.Core/DataStructures/ServiceRequestHeap.cs`
+- `MunicipalServices.Core/DataStructures/ServiceRequestGraph.cs`
+- `MunicipalServices.Core/DataStructures/ServiceStatusTree.cs`
+- `MunicipalServices.Core/DataStructures/EmergencyNoticeTree.cs`
 
 ## Future Updates
 
 - **Service Request Tracking**: A feature to track the status of reported issues and requests.
 - **Local Events and Announcements**: A section that will provide information about local municipal events and announcements.
-
----
 
 ## Contact
 

@@ -10,6 +10,7 @@ using MunicipalServices.Models;
 using Newtonsoft.Json;
 using System.Data;
 using MunicipalServices.Core.Utilities;
+using System.Diagnostics;
 
 namespace MunicipalServices.Core.Services
 {
@@ -58,17 +59,19 @@ namespace MunicipalServices.Core.Services
             //}
             
             _connectionString = $"Data Source={dbPath};Version=3;";
-            
+
             // Create fresh tables
             //CreateTables();
-            
+
             // Log initialization
+
             using (var connection = CreateConnection())
             {
                 var requestCount = connection.ExecuteScalar<int>("SELECT COUNT(*) FROM ServiceRequests");
                 Logger.LogInfo($"Database initialized with {requestCount} existing requests");
             }
         }
+
 
         public List<Attachment> GetAttachmentsForRequest(string requestId)
         {
@@ -477,6 +480,48 @@ namespace MunicipalServices.Core.Services
                 command.Parameters.AddWithValue("@ContentBase64", attachment.ContentBase64);
 
                 command.ExecuteNonQuery();
+            }
+        }
+
+        public ServiceRequest GetRequestById(string requestId)
+        {
+            try
+            {
+                using (var connection = CreateConnection())
+                {
+                    connection.Open();  // Explicitly open the connection
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = @"
+                            SELECT * FROM ServiceRequests 
+                            WHERE RequestId = @RequestId";
+                        command.Parameters.Add("@RequestId", DbType.String).Value = requestId;
+
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return new ServiceRequest
+                                {
+                                    RequestId = reader.GetString(reader.GetOrdinal("RequestId")),
+                                    Category = reader.GetString(reader.GetOrdinal("Category")),
+                                    Description = reader.GetString(reader.GetOrdinal("Description")),
+                                    Location = reader.GetString(reader.GetOrdinal("Location")),
+                                    Status = reader.GetString(reader.GetOrdinal("Status")),
+                                    Latitude = reader.GetDouble(reader.GetOrdinal("Latitude")),
+                                    Longitude = reader.GetDouble(reader.GetOrdinal("Longitude")),
+                                    SubmissionDate = DateTime.Parse(reader.GetString(reader.GetOrdinal("CreatedDate")))
+                                };
+                            }
+                            return null;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error getting request by ID {requestId}: {ex}");
+                return null;
             }
         }
     }

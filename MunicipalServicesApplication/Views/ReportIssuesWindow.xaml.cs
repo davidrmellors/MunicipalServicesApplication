@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using DotNetEnv;
 
 namespace MunicipalServicesApplication.Views
 {
@@ -30,7 +31,22 @@ namespace MunicipalServicesApplication.Views
             InitializeComponent();
             attachments = new List<Attachment>();
             currentUser = user;
-            placesService = new GooglePlacesService("AIzaSyCyt7gd-FzBDBA9h3r7AwNH5Zp40Rh1EhI");
+
+            // Get the application's base directory
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string projectDir = Directory.GetParent(baseDir).Parent.Parent.FullName;
+            string envPath = Path.Combine(projectDir, ".env");
+            
+            Debug.WriteLine($"Looking for .env file at: {envPath}");
+            
+            // Load environment variables from .env file with explicit path
+            Env.Load(envPath);
+            
+            // Check if the API key was loaded
+            string apiKey = Environment.GetEnvironmentVariable("GOOGLE_PLACES_API_KEY");
+            Debug.WriteLine($"API Key loaded: {!string.IsNullOrEmpty(apiKey)}");
+            
+            placesService = new GooglePlacesService(apiKey);
             
             selectedLatitude = 0;
             selectedLongitude = 0;

@@ -13,9 +13,15 @@
         <SolidColorBrush x:Key="PrimaryColor" Color="#007A4D"/>
         <SolidColorBrush x:Key="SecondaryColor" Color="#4A4A4A"/>
         <SolidColorBrush x:Key="AccentColor" Color="#003399"/>
+
+        <LinearGradientBrush x:Key="BackgroundGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#F0F0F0" Offset="0"/>
+            <GradientStop Color="#E0E0E0" Offset="1"/>
+        </LinearGradientBrush>
+
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Background="{StaticResource BackgroundGradient}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -48,20 +54,36 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Image Source="../Resources/zaCoatOfArms.ico" Height="60" Margin="0,0,20,0" Grid.Column="0"/>
-            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="South African Government" FontSize="20" FontWeight="Bold" Foreground="{StaticResource SecondaryColor}"/>
-                <TextBlock Text="Municipal Services Platform" FontSize="16" Foreground="{StaticResource SecondaryColor}"/>
-            </StackPanel>
-            <Image Source="../Resources/zaFlag.ico" Height="40" Grid.Column="2" Margin="20,0,0,0"/>
+            
+            <DockPanel Grid.Column="1" VerticalAlignment="Center">
+                <materialDesign:PackIcon Kind="ClipboardEdit" 
+                                       Foreground="{StaticResource PrimaryColor}" 
+                                       Width="32" 
+                                       Height="32"
+                                       Margin="10,0,16,0"
+                                       VerticalAlignment="Center"/>
+                <StackPanel>
+                    <TextBlock Text="Report an Issue" 
+                              FontSize="24" 
+                              FontWeight="Bold" 
+                              Foreground="{StaticResource PrimaryColor}"/>
+                    <TextBlock Text="Submit a new service request" 
+                              Foreground="{StaticResource SecondaryColor}"
+                              FontSize="14"
+                              Margin="0,4,0,0"/>
+                </StackPanel>
+            </DockPanel>
+            
+            <Image Grid.Column="2" 
+                   Source="../Resources/zaCoatOfArms.ico" 
+                   Height="60" 
+                   Margin="16,10,10,10"/>
         </Grid>
 
         <!-- Main Content -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="40,20,40, 0">
-                <TextBlock Text="Report an Issue" FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryColor}" Margin="0,0,0,20"/>
-
-                <StackPanel Grid.Row="2" Margin="0,20,0,0">
+        <materialDesign:Card Grid.Row="2" Margin="20" UniformCornerRadius="8">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="40,20,40,0">
                     <TextBlock Text="Location" Foreground="{StaticResource SecondaryColor}" Margin="0,10,0,5"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -92,55 +114,54 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+
+                    <TextBlock Text="Issue Category" Foreground="{StaticResource SecondaryColor}" Margin="0,10,0,5"/>
+                    <!-- Update the ComboBox with more categories -->
+                    <ComboBox x:Name="CmbCategory" Margin="0,0,0,15"
+                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                              materialDesign:HintAssist.Hint="Select a category">
+                        <ComboBoxItem Content="Sanitation" />
+                        <ComboBoxItem Content="Roads" />
+                        <ComboBoxItem Content="Utilities" />
+                        <ComboBoxItem Content="Public Safety" />
+                        <ComboBoxItem Content="Parks and Recreation" />
+                        <ComboBoxItem Content="Public Transportation" />
+                        <ComboBoxItem Content="Noise Complaints" />
+                        <ComboBoxItem Content="Building and Construction" />
+                        <ComboBoxItem Content="Environmental Issues" />
+                        <ComboBoxItem Content="Other" />
+                    </ComboBox>
+
+                    <TextBlock Text="Description" Foreground="{StaticResource SecondaryColor}" Margin="0,10,0,5"/>
+                    <TextBox x:Name="TxtDescription" Text="Enter Description" Foreground="{StaticResource SecondaryColor}"
+                             GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             TextWrapping="Wrap" AcceptsReturn="True" Height="50" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Attachments" Foreground="{StaticResource SecondaryColor}" Margin="0,10,0,5"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <Button Content="Attach Files" Click="AttachFiles_Click"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Foreground="{StaticResource PrimaryColor}"
+                                BorderBrush="{StaticResource PrimaryColor}"
+                                Margin="0,0,10,0"/>
+                        <TextBlock x:Name="TxtAttachmentCount" VerticalAlignment="Center" 
+                                   Foreground="{StaticResource SecondaryColor}"/>
+                    </StackPanel>
+
+                    <ProgressBar x:Name="ProgressBar" Minimum="0" Maximum="100" Height="10" 
+                                 Style="{StaticResource MaterialDesignLinearProgressBar}"
+                                 Foreground="{StaticResource PrimaryColor}"
+                                 Margin="0,0,0,15"/>
+
+                    <Button Content="Submit" Click="SubmitButton_Click"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Background="{StaticResource PrimaryColor}"
+                            Foreground="White"
+                            Margin="0,0,0,15"/>
                 </StackPanel>
-
-                <TextBlock Text="Issue Category" Foreground="{StaticResource SecondaryColor}" Margin="0,10,0,5"/>
-                <!-- Update the ComboBox with more categories -->
-                <ComboBox x:Name="CmbCategory" Margin="0,0,0,15"
-                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                          materialDesign:HintAssist.Hint="Select a category">
-                    <ComboBoxItem Content="Sanitation" />
-                    <ComboBoxItem Content="Roads" />
-                    <ComboBoxItem Content="Utilities" />
-                    <ComboBoxItem Content="Public Safety" />
-                    <ComboBoxItem Content="Parks and Recreation" />
-                    <ComboBoxItem Content="Public Transportation" />
-                    <ComboBoxItem Content="Noise Complaints" />
-                    <ComboBoxItem Content="Building and Construction" />
-                    <ComboBoxItem Content="Environmental Issues" />
-                    <ComboBoxItem Content="Other" />
-                </ComboBox>
-
-                <TextBlock Text="Description" Foreground="{StaticResource SecondaryColor}" Margin="0,10,0,5"/>
-                <TextBox x:Name="TxtDescription" Text="Enter Description" Foreground="{StaticResource SecondaryColor}"
-                         GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         TextWrapping="Wrap" AcceptsReturn="True" Height="50" Margin="0,0,0,15"/>
-
-                <TextBlock Text="Attachments" Foreground="{StaticResource SecondaryColor}" Margin="0,10,0,5"/>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                    <Button Content="Attach Files" Click="AttachFiles_Click"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            Foreground="{StaticResource PrimaryColor}"
-                            BorderBrush="{StaticResource PrimaryColor}"
-                            Margin="0,0,10,0"/>
-                    <TextBlock x:Name="TxtAttachmentCount" VerticalAlignment="Center" 
-                               Foreground="{StaticResource SecondaryColor}"/>
-                </StackPanel>
-
-                <ProgressBar x:Name="ProgressBar" Minimum="0" Maximum="100" Height="10" 
-                             Style="{StaticResource MaterialDesignLinearProgressBar}"
-                             Foreground="{StaticResource PrimaryColor}"
-                             Margin="0,0,0,15"/>
-
-                <Button Content="Submit" Click="SubmitButton_Click"
-                        Style="{StaticResource MaterialDesignRaisedButton}"
-                        Background="{StaticResource PrimaryColor}"
-                        Foreground="White"
-                        Margin="0,0,0,15"/>
-               
-            </StackPanel>
-        </ScrollViewer>
+            </ScrollViewer>
+        </materialDesign:Card>
         <Button Grid.Row="3" Content="Back to Main Menu" Click="BackToMainMenu_Click"
                 Style="{StaticResource MaterialDesignOutlinedButton}"
                 Foreground="{StaticResource SecondaryColor}"

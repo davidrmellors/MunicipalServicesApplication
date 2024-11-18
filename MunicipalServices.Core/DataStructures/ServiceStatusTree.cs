@@ -6,57 +6,19 @@ namespace MunicipalServices.Core.DataStructures
 {
     public class ServiceStatusTree
     {
-        private class Node
-        {
-            public ServiceStatus Data;
-            public Node Left, Right;
-            public bool IsRed;
+        private readonly List<ServiceStatus> _statuses;
 
-            public Node(ServiceStatus data)
+        public ServiceStatusTree()
+        {
+            _statuses = new List<ServiceStatus>
             {
-                Data = data;
-                IsRed = true;
-            }
+                new ServiceStatus { Service = "Water Supply", Status = "Operational", StatusColor = "#007A4D" },
+                new ServiceStatus { Service = "Electricity", Status = "Maintenance", StatusColor = "#FFB612" },
+                new ServiceStatus { Service = "Waste Collection", Status = "Operational", StatusColor = "#007A4D" },
+                new ServiceStatus { Service = "Road Maintenance", Status = "Disrupted", StatusColor = "#E03C31" }
+            };
         }
 
-        private Node root;
-
-        public void Insert(ServiceStatus status)
-        {
-            root = InsertRec(root, status);
-            root.IsRed = false;
-        }
-
-        private Node InsertRec(Node node, ServiceStatus status)
-        {
-            if (node == null)
-                return new Node(status);
-
-            int compareResult = string.Compare(status.Service, node.Data.Service);
-
-            if (compareResult < 0)
-                node.Left = InsertRec(node.Left, status);
-            else if (compareResult > 0)
-                node.Right = InsertRec(node.Right, status);
-
-            return node;
-        }
-
-        public IEnumerable<ServiceStatus> GetAll()
-        {
-            var result = new List<ServiceStatus>();
-            InOrderTraversal(root, result);
-            return result;
-        }
-
-        private void InOrderTraversal(Node node, List<ServiceStatus> result)
-        {
-            if (node != null)
-            {
-                InOrderTraversal(node.Left, result);
-                result.Add(node.Data);
-                InOrderTraversal(node.Right, result);
-            }
-        }
+        public List<ServiceStatus> GetAll() => _statuses;
     }
 }

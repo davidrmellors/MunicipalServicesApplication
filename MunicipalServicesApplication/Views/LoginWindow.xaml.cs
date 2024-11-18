@@ -25,15 +25,16 @@ namespace MunicipalServicesApplication.Views
             if (IsValidSouthAfricanID(idNumber))
             {
                 HideError();
-                var userProfileService = new UserProfileService();
-                App.CurrentUser = userProfileService.GetOrCreateUser(idNumber);
-                MainWindow mainWindow = new MainWindow();
+                App.CurrentUser = new UserProfileService().GetOrCreateUser(idNumber);
+                
+                // Show main window immediately
+                var mainWindow = new MainWindow();
                 mainWindow.Show();
                 Close();
             }
             else
             {
-                ShowError("Invalid South African ID number.");
+                ShowError("Please enter a valid South African ID number.");
             }
         }
 

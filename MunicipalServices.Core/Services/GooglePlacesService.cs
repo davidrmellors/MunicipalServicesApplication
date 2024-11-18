@@ -16,6 +16,10 @@ namespace MunicipalServices.Core.Services
 
         public GooglePlacesService(string apiKey)
         {
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                throw new ArgumentException("API key cannot be null or empty. Please check your .env file.");
+            }
             this.apiKey = apiKey;
             this.client = new HttpClient();
         }

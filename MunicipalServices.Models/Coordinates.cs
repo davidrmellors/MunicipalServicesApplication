@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace MunicipalServices.Models
 {
-    public class CommunityStat
+    public class Coordinates
     {
-        public string Label { get; set; }
-        public string Value { get; set; }
-        public double Progress { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
     }
 }

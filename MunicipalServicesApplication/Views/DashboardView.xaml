@@ -74,6 +74,38 @@
             </DockPanel>
         </DataTemplate>
 
+        <DataTemplate DataType="{x:Type models:ServiceRequest}">
+            <materialDesign:Card Margin="0,0,0,8" UniformCornerRadius="4">
+                <Grid Margin="12,8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <DockPanel>
+                        <TextBlock Text="{Binding RequestId}" 
+                                  FontFamily="Consolas"
+                                  Foreground="{StaticResource SecondaryColor}"
+                                  DockPanel.Dock="Right"/>
+                        <TextBlock>
+                            <Run Text="{Binding Category}" FontWeight="SemiBold"/>
+                            <Run Text=" - Priority:"/>
+                            <Run Text="{Binding Priority}"/>
+                        </TextBlock>
+                    </DockPanel>
+                    <TextBlock Grid.Row="1" 
+                              Text="{Binding Description}" 
+                              TextWrapping="Wrap"
+                              Margin="0,4,0,0"/>
+                    <TextBlock Grid.Row="2" 
+                              Text="{Binding Location}" 
+                              Foreground="{StaticResource SecondaryColor}"
+                              FontSize="12"
+                              Margin="0,4,0,0"/>
+                </Grid>
+            </materialDesign:Card>
+        </DataTemplate>
+
     </UserControl.Resources>
 
     <Grid Grid.Column="1" Background="{StaticResource BackgroundGradient}">
@@ -100,7 +132,7 @@
             <Rectangle Grid.Column="5" Fill="#000000"/>
         </Grid>
 
-        <Grid Grid.Row="1" Background="White" Margin="0, 0, 0, 10">
+        <Grid Grid.Row="1" Background="White" Margin="0, 0, 0, 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -174,56 +206,144 @@
             </Grid.RowDefinitions>
 
                 <!-- Dashboard Content -->
-                <ScrollViewer Grid.Row="1" Margin="20,0,20,20">
-                    <WrapPanel>
-                        <!-- Emergency Alerts -->
-                        <materialDesign:Card Margin="0,0,20,20" Width="400" UniformCornerRadius="8">
-                            <StackPanel Margin="16">
-                                <DockPanel>
-                                    <materialDesign:PackIcon Kind="Alert" 
+                <Grid Grid.Row="1" Margin="20,10,20,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- First Row Cards - Critical Alerts and Emergency Contacts -->
+                    <materialDesign:Card Grid.Column="0" Grid.Row="0" Margin="0,0,10,20" UniformCornerRadius="8" Height="200">
+                        <DockPanel Margin="16">
+                            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+                                <materialDesign:PackIcon Kind="AlertCircle" 
                                                        Foreground="#E03C31" 
                                                        Width="24" 
                                                        Height="24"/>
-                                    <TextBlock Text="Emergency Notices" 
+                                <TextBlock Text="Critical Service Alerts" 
                                          FontSize="18" 
                                          FontWeight="Bold" 
                                          Margin="8,0,0,0"/>
-                                </DockPanel>
-                                <ItemsControl x:Name="EmergencyNoticesControl" Margin="0,16,0,0"/>
-                            </StackPanel>
-                        </materialDesign:Card>
-
-                    <!-- Service Status -->
-                    <materialDesign:Card Margin="0,0,20,20" Width="400" UniformCornerRadius="8">
-                        <StackPanel Margin="16">
-                            <DockPanel>
-                                <materialDesign:PackIcon Kind="CircleSlice8" 
-                                                   Foreground="{StaticResource PrimaryColor}" 
-                                                   Width="24" 
-                                                   Height="24"/>
-                                <TextBlock Text="Service Status" 
-                                     FontSize="18" 
-                                     FontWeight="Bold" 
-                                     Margin="8,0,0,0"/>
                             </DockPanel>
-                            <ItemsControl x:Name="ServiceStatusControl" Margin="0,16,0,0"/>
-                        </StackPanel>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                                         HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl x:Name="EmergencyNoticesControl">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <materialDesign:Card Margin="0,0,0,8" UniformCornerRadius="4">
+                                                <Grid Margin="12,8">
+                                                    <StackPanel>
+                                                        <DockPanel>
+                                                            <TextBlock Text="{Binding RequestId}" 
+                                                                         FontFamily="Consolas"
+                                                                         Foreground="{StaticResource SecondaryColor}"
+                                                                         DockPanel.Dock="Right"/>
+                                                            <TextBlock>
+                                                                <Run Text="{Binding Category}" FontWeight="SemiBold"/>
+                                                                <Run Text=" - Priority:"/>
+                                                                <Run Text="{Binding Priority}"/>
+                                                            </TextBlock>
+                                                        </DockPanel>
+                                                        <TextBlock Text="{Binding Description}" 
+                                                                   TextWrapping="Wrap"
+                                                                   Margin="0,4,0,0"/>
+                                                        <TextBlock Text="{Binding Location}" 
+                                                                   Opacity="0.7"
+                                                                   FontSize="12"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </materialDesign:Card>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </DockPanel>
                     </materialDesign:Card>
 
-                    <!-- Recent Requests -->
-                        <materialDesign:Card Margin="0,0,20,20" Width="400" UniformCornerRadius="8">
-                            <StackPanel Margin="16">
-                                <DockPanel>
-                                    <materialDesign:PackIcon Kind="ClipboardList" 
-                                                             Foreground="{StaticResource AccentColor}" 
-                                                             Width="24" 
-                                                             Height="24"/>
-                                    <TextBlock Text="My Recent Requests" 
-                                               FontSize="18" 
-                                               FontWeight="Bold" 
-                                               Margin="8,0,0,0"/>
-                                </DockPanel>
-                                <ItemsControl x:Name="RecentRequestsControl" Margin="0,16,0,0">
+                    <materialDesign:Card Grid.Column="1" Grid.Row="0" Margin="10,0,0,20" UniformCornerRadius="8" Height="200">
+                        <DockPanel Margin="16">
+                            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+                                <materialDesign:PackIcon Kind="PhoneAlert" 
+                                                       Foreground="#E03C31" 
+                                                       Width="24" 
+                                                       Height="24"/>
+                                <TextBlock Text="Emergency Contacts" 
+                                          FontSize="18" 
+                                          FontWeight="Bold" 
+                                          Margin="8,0,0,0"/>
+                            </DockPanel>
+                            <ScrollViewer VerticalScrollBarVisibility="Disabled" 
+                                         HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl>
+                                    <ItemsControl.Items>
+                                        <!-- Police -->
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <materialDesign:PackIcon Kind="PoliceBadge" 
+                                                           Width="20" Height="20" 
+                                                           Margin="0,0,12,0"/>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="Police Emergency" FontWeight="SemiBold"/>
+                                                <TextBlock Text="10111" FontFamily="Consolas"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <!-- Ambulance -->
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <materialDesign:PackIcon Kind="Ambulance" 
+                                                           Width="20" Height="20" 
+                                                           Margin="0,0,12,0"/>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="Ambulance" FontWeight="SemiBold"/>
+                                                <TextBlock Text="10177" FontFamily="Consolas"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <!-- Fire Department -->
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <materialDesign:PackIcon Kind="FireTruck" 
+                                                           Width="20" Height="20" 
+                                                           Margin="0,0,12,0"/>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="Fire Department" FontWeight="SemiBold"/>
+                                                <TextBlock Text="107" FontFamily="Consolas"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </ItemsControl.Items>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </DockPanel>
+                    </materialDesign:Card>
+
+                    <!-- Second Row Cards - Services Status and Active Requests -->
+                    <materialDesign:Card Grid.Column="0" Grid.Row="1" Margin="0,0,10,20" UniformCornerRadius="8" Height="300">
+                        <DockPanel Margin="16" LastChildFill="True">
+                            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+                                <materialDesign:PackIcon Kind="WaterCheck" 
+                                                       Foreground="{StaticResource PrimaryColor}" 
+                                                       Width="24" 
+                                                       Height="24"/>
+                                <TextBlock Text="Essential Services Status" 
+                                         FontSize="18" 
+                                         FontWeight="Bold" 
+                                         Margin="8,0,0,0"/>
+                            </DockPanel>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                                         HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl x:Name="ServiceStatusControl">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Margin="0,0,0,8">
@@ -231,54 +351,84 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <StackPanel>
-                                                    <TextBlock Text="{Binding RequestId}" 
-                                                               FontWeight="SemiBold"/>
-                                                    <TextBlock Text="{Binding Category}" 
-                                                               Foreground="{StaticResource SecondaryColor}"
-                                                               FontSize="12"/>
-                                                </StackPanel>
-                                                <Button Grid.Column="1" 
-                                                        Content="Copy ID"
-                                                        Click="CopyRequestId_Click"
-                                                        Style="{StaticResource MaterialDesignFlatButton}"/>
+                                                <TextBlock Text="{Binding Service}" 
+                                                         VerticalAlignment="Center"/>
+                                                <Border Grid.Column="1" 
+                                                        Background="{Binding StatusColor}" 
+                                                        CornerRadius="4" 
+                                                        Padding="8,4">
+                                                    <TextBlock Text="{Binding Status}" 
+                                                             Foreground="White"/>
+                                                </Border>
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                            </StackPanel>
-                        </materialDesign:Card>
-
-                        <ListView x:Name="RelatedRequestsControl" Grid.Row="2" Grid.Column="1" Margin="10">
-                            <ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock Text="{Binding Category}" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding Description}"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-
-                        <!-- Quick Stats -->
-                    <materialDesign:Card Margin="0,0,20,20" Width="400" UniformCornerRadius="8">
-                        <StackPanel Margin="16">
-                            <DockPanel>
-                                <materialDesign:PackIcon Kind="ChartBar" 
-                                                   Foreground="{StaticResource PrimaryColor}" 
-                                                   Width="24" 
-                                                   Height="24"/>
-                                <TextBlock Text="Community Stats" 
-                                     FontSize="18" 
-                                     FontWeight="Bold" 
-                                     Margin="8,0,0,0"/>
-                            </DockPanel>
-                            <ItemsControl x:Name="StatsControl" Margin="0,16,0,0"/>
-                        </StackPanel>
+                            </ScrollViewer>
+                        </DockPanel>
                     </materialDesign:Card>
 
-                </WrapPanel>
-            </ScrollViewer>
+                    <materialDesign:Card Grid.Column="1" Grid.Row="1" Margin="10,0,0,20" UniformCornerRadius="8" Height="300">
+                        <DockPanel Margin="16" LastChildFill="True">
+                            <!-- Header -->
+                            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+                                <materialDesign:PackIcon Kind="ClipboardList" 
+                                                       Foreground="{StaticResource PrimaryColor}" 
+                                                       Width="24" 
+                                                       Height="24"/>
+                                <TextBlock Text="My Active Service Requests" 
+                                          FontSize="18" 
+                                          FontWeight="Bold" 
+                                          Margin="8,0,0,0"/>
+                            </DockPanel>
+                            
+                            <!-- Scrollable Content -->
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                                         HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl x:Name="RecentRequestsControl">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <materialDesign:Card Margin="0,0,0,8" UniformCornerRadius="4">
+                                                <Grid Margin="12,8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel>
+                                                        <TextBlock>
+                                                            <Run Text="{Binding Category}" FontWeight="SemiBold"/>
+                                                            <Run Text=" - "/>
+                                                            <Run Text="{Binding Status}" Foreground="{StaticResource PrimaryColor}"/>
+                                                        </TextBlock>
+                                                        <TextBlock Text="{Binding Description}" 
+                                                                 TextWrapping="Wrap" 
+                                                                 Opacity="0.7"/>
+                                                        <TextBlock Text="{Binding RequestId}" 
+                                                                 FontSize="11" 
+                                                                 Opacity="0.5"/>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="1" 
+                                                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                            Height="30"
+                                                            Padding="8,0"
+                                                            Click="CopyRequestId_Click">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <materialDesign:PackIcon Kind="ContentCopy" 
+                                                                                   Width="16" 
+                                                                                   Height="16" 
+                                                                                   Margin="0,0,4,0"/>
+                                                            <TextBlock Text="Copy ID"/>
+                                                        </StackPanel>
+                                                    </Button>
+                                                </Grid>
+                                            </materialDesign:Card>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </DockPanel>
+                    </materialDesign:Card>
+                </Grid>
         </Grid>
     </Grid>
     </Grid>

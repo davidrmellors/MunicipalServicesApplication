@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using MaterialDesignThemes.Wpf;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Timers;
 
 namespace MunicipalServicesApplication.Views
 {
@@ -20,82 +22,184 @@ namespace MunicipalServicesApplication.Views
     {
         public event EventHandler BackToMainRequested;
         private readonly ServiceRequestManager _requestManager;
+        private bool _isLoading;
+        private System.Timers.Timer _searchTimer;
+        private const int PAGE_SIZE = 10;
+        private int currentPage = 0;
+        private bool isLoadingMore = false;
+        private List<ServiceRequest> loadedRequests = new List<ServiceRequest>();
 
         public ServiceRequestStatusView()
         {
             InitializeComponent();
             _requestManager = new ServiceRequestManager();
+            SetupSearchTimer();
+            _ = LoadInitialDataAsync();
+        }
+
+        private async Task LoadInitialDataAsync()
+        {
+            await ShowLoadingAsync(async () =>
+            {
+                // Clear everything
+                loadedRequests.Clear();
+                currentPage = 0;
+                isLoadingMore = false;
+                
+                // Remove and re-add scroll event to prevent multiple subscriptions
+                MainScrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
+                MainScrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
+                
+                // Load first page
+                var requests = await LoadRequestsPage(0);
+                RequestsItemsControl.ItemsSource = requests;
+            });
+        }
+
+        private async Task<List<ServiceRequest>> LoadRequestsPage(int page)
+        {
+            var allRequests = await Task.Run(() => DatabaseService.Instance.GetAllRequests());
+            var pagedRequests = allRequests
+                .OrderByDescending(r => r.Priority)
+                .Skip(page * PAGE_SIZE)
+                .Take(PAGE_SIZE)
+                .ToList();
+
+            // Pre-load attachments and related issues
+            foreach (var request in pagedRequests)
+            {
+                try
+                {
+                    request.Attachments = await Task.Run(() => 
+                        DatabaseService.Instance.GetAttachmentsForRequest(request.RequestId));
+                    
+                    request.RelatedIssues = await Task.Run(() => 
+                        _requestManager.GetRelatedIssues(request.RequestId)?.ToList() ?? new List<ServiceRequest>());
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error loading request details: {ex}");
+                    request.Attachments = new List<Attachment>();
+                    request.RelatedIssues = new List<ServiceRequest>();
+                }
+            }
+
+            if (page == 0)
+            {
+                loadedRequests.Clear();
+            }
+            loadedRequests.AddRange(pagedRequests);
+            return loadedRequests;
+        }
+
+        private async void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            var scrollViewer = (ScrollViewer)sender;
+            if (scrollViewer.VerticalOffset >= scrollViewer.ScrollableHeight - 200 && !isLoadingMore)
+            {
+                isLoadingMore = true;
+                currentPage++;
+                var newRequests = await LoadRequestsPage(currentPage);
+                
+                if (newRequests.Any())
+                {
+                    RequestsItemsControl.ItemsSource = loadedRequests;
+                }
+                isLoadingMore = false;
+            }
+        }
+
+        private void SetupSearchTimer()
+        {
+            _searchTimer = new System.Timers.Timer(300); // 300ms delay
+            _searchTimer.Elapsed += async (s, e) =>
+            {
+                await Dispatcher.InvokeAsync(async () =>
+                {
+                    await PerformSearch(SearchRequestId.Text);
+                });
+            };
+            _searchTimer.AutoReset = false;
+
             SearchRequestId.TextChanged += SearchRequestId_TextChanged;
-            UpdateRequestsDisplay();
         }
 
         private void SearchRequestId_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string searchText = SearchRequestId.Text;
+            _searchTimer.Stop(); // Reset the timer
+            _searchTimer.Start(); // Start the timer again
+        }
+
+        private async Task PerformSearch(string searchText)
+        {
+            // Disable scroll event handler during search
+            MainScrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
+
             if (string.IsNullOrWhiteSpace(searchText))
             {
-                UpdateRequestsDisplay();
-                RequestDetailsPanel.DataContext = null;
-                return;
+                searchText = "REQ";
             }
 
-            try
+            await ShowLoadingAsync(async () =>
             {
-                var allRequests = DatabaseService.Instance.GetAllRequests();
+                var allRequests = await Task.Run(() => DatabaseService.Instance.GetAllRequests());
                 var filteredRequests = allRequests
-                    .Where(r => r.MatchesSearch(searchText))
+                    .Where(r => r.RequestId.ToUpperInvariant().Contains(searchText.ToUpperInvariant()))
+                    .OrderByDescending(r => r.Priority)
                     .ToList();
 
+                // Pre-load attachments and related issues for filtered results
                 foreach (var request in filteredRequests)
                 {
-                    request.Attachments = DatabaseService.Instance.GetAttachmentsForRequest(request.RequestId);
-                    request.RelatedIssues = _requestManager.GetRelatedIssues(request.RequestId);
+                    try
+                    {
+                        request.Attachments = await Task.Run(() => 
+                            DatabaseService.Instance.GetAttachmentsForRequest(request.RequestId));
+                        
+                        request.RelatedIssues = await Task.Run(() => 
+                            _requestManager.GetRelatedIssues(request.RequestId)?.ToList() ?? new List<ServiceRequest>());
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error loading request details during search: {ex}");
+                        request.Attachments = new List<Attachment>();
+                        request.RelatedIssues = new List<ServiceRequest>();
+                    }
                 }
 
-                RequestsItemsControl.ItemsSource = filteredRequests.OrderByDescending(r => r.Priority);
-                
-                // Set details panel for exact match
-                var exactMatch = filteredRequests.FirstOrDefault(r => r.RequestId.Equals(searchText, StringComparison.OrdinalIgnoreCase));
-                if (exactMatch != null)
-                {
-                    RequestDetailsPanel.DataContext = exactMatch;
-                }
+                // Update UI with search results
+                loadedRequests = filteredRequests;
+                RequestsItemsControl.ItemsSource = loadedRequests;
+            });
+        }
+
+        private async Task ShowLoadingAsync(Func<Task> action)
+        {
+            if (_isLoading) return;
+            
+            try
+            {
+                _isLoading = true;
+                LoadingOverlay.Visibility = Visibility.Visible;
+
+                await action();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error searching requests: {ex.Message}", "Error",
+                Debug.WriteLine($"Error: {ex}");
+                MessageBox.Show($"Error loading data: {ex.Message}", "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                LoadingOverlay.Visibility = Visibility.Collapsed;
+                _isLoading = false;
             }
         }
 
-        private void UpdateRequestsDisplay()
+        private void BackToMain_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                var allRequests = DatabaseService.Instance.GetAllRequests()
-                    .OrderByDescending(r => r.Priority)
-                    .ToList();
-                
-                foreach (var request in allRequests)
-                {
-                    // Always load attachments to ensure they're fresh
-                    request.Attachments = DatabaseService.Instance.GetAttachmentsForRequest(request.RequestId);
-                    Debug.WriteLine($"Loaded {request.Attachments?.Count ?? 0} attachments for request {request.RequestId}");
-                    
-                    if (request.RelatedIssues == null)
-                    {
-                        request.RelatedIssues = _requestManager.GetRelatedIssues(request.RequestId);
-                    }
-                }
-                
-                RequestsItemsControl.ItemsSource = allRequests;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error in UpdateRequestsDisplay: {ex}");
-                MessageBox.Show($"Error loading requests: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            BackToMainRequested?.Invoke(this, EventArgs.Empty);
         }
 
         private void ViewAttachment_Click(object sender, RoutedEventArgs e)
@@ -196,107 +300,30 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
-
-        private void BackToMain_Click(object sender, RoutedEventArgs e)
+        // Add this method to handle expander state changes
+        private async void Expander_Expanded(object sender, RoutedEventArgs e)
         {
-            BackToMainRequested?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void SearchButton_Click(object sender, RoutedEventArgs e)
-        {
-            SearchRequestId_TextChanged(SearchRequestId, null);
-        }
-
-        private void ViewRelatedRequests_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button && button.DataContext is ServiceRequest request)
+            if (sender is Expander expander && expander.DataContext is ServiceRequest request)
             {
                 try
                 {
-                    // Get related requests using the graph
-                    var relatedRequests = _requestManager.GetRelatedIssues(request.RequestId).ToList();
-                    
-                    // Update the request's RelatedIssues property
-                    request.RelatedIssues = relatedRequests;
-                    
-                    // Find the parent expander
-                    var grid = button.Parent as Grid;
-                    var expander = grid?.Parent as Expander;
-                    
-                    if (expander != null)
+                    if (request.Attachments == null)
                     {
-                        expander.IsExpanded = true;
+                        request.Attachments = await Task.Run(() => 
+                            DatabaseService.Instance.GetAttachmentsForRequest(request.RequestId));
+                        Debug.WriteLine($"Loaded {request.Attachments?.Count ?? 0} attachments on expand");
                     }
                     
-                    // Debug information
-                    Debug.WriteLine($"Found {relatedRequests.Count()} related requests for {request.RequestId}");
-                    foreach (var related in relatedRequests)
+                    if (request.RelatedIssues == null)
                     {
-                        Debug.WriteLine($"Related request: {related.RequestId} - {related.Category}");
+                        request.RelatedIssues = await Task.Run(() => 
+                            _requestManager.GetRelatedIssues(request.RequestId)?.ToList() ?? new List<ServiceRequest>());
+                        Debug.WriteLine($"Loaded {request.RelatedIssues?.Count ?? 0} related issues on expand");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"Error in ViewRelatedRequests_Click: {ex}");
-                    MessageBox.Show($"Error loading related requests: {ex.Message}", "Error",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-
-        private void ViewAttachmentsExpander_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button && button.DataContext is ServiceRequest request)
-            {
-                try
-                {
-                    Debug.WriteLine($"Attempting to expand attachments for request {request.RequestId}");
-                    
-                    // Find the parent Card that contains both button and expander
-                    var parentElement = button.Parent as FrameworkElement;
-                    while (parentElement != null && !(parentElement is MaterialDesignThemes.Wpf.Card))
-                    {
-                        parentElement = VisualTreeHelper.GetParent(parentElement) as FrameworkElement;
-                        Debug.WriteLine($"Traversing visual tree: {parentElement?.GetType().Name}");
-                    }
-
-                    if (parentElement != null)
-                    {
-                        // Find all expanders within this Card
-                        var expanders = FindVisualChildren<Expander>(parentElement);
-                        var attachmentsExpander = expanders.FirstOrDefault(exp => exp.Header?.ToString() == "Attachments");
-                        
-                        if (attachmentsExpander != null)
-                        {
-                            attachmentsExpander.IsExpanded = true;
-                            Debug.WriteLine("Successfully expanded attachments section");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Error in ViewAttachmentsExpander_Click: {ex}");
-                }
-            }
-        }
-
-        // Helper method to find visual children of a specific type
-        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
-        {
-            if (depObj != null)
-            {
-                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
-                {
-                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-                    if (child != null && child is T t)
-                    {
-                        yield return t;
-                    }
-
-                    foreach (T childOfChild in FindVisualChildren<T>(child))
-                    {
-                        yield return childOfChild;
-                    }
+                    Debug.WriteLine($"Error loading request details: {ex}");
                 }
             }
         }
