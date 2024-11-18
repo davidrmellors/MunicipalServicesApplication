@@ -36,6 +36,13 @@ The application is designed with a modern user interface, which includes animati
    - **Service Status Tree**: Provides hierarchical view of service statuses
    - **Emergency Notice Tree**: Manages critical municipal announcements and alerts
 
+6. **Automated Event Aggregation**
+   - Built-in web scraper that automatically fetches local events from eventsincapetown.com
+   - Asynchronous batch processing of events to maintain UI responsiveness
+   - Intelligent date parsing for various date formats
+   - HTML content cleaning and formatting for consistent display
+   - Automatic image URL resolution and fallback handling
+
 ## Technologies Used
 
 - **Language**: C# (WPF using .NET Framework 4.7.2)
@@ -102,6 +109,12 @@ var urgentRequest = requestHeap.ExtractMax();
 - Manages critical municipal announcements and alerts
 - Provides quick access to emergency notices by severity
 
+Note: The current implementation uses a List-based storage mechanism rather than a true tree structure. Future updates will implement a proper tree-based structure to enable:
+- Organization of notices by severity
+- Proper tree balancing
+- Enhanced search functionality
+- Efficient deletion of old/resolved notices
+
 Example usage:
 ```csharp
 var emergencyTree = EmergencyNoticeTree.Instance;
@@ -129,6 +142,41 @@ var notices = emergencyTree.GetAll();
 - Priority-based processing for critical issues
 - Graph-based relationship management
 
+### 3. Event Web Scraper
+
+The application includes a robust web scraping system implemented in the `EventService` class that:
+
+- **Asynchronous Data Fetching**
+  - Uses `HttpClient` for non-blocking web requests
+  - Processes events in configurable batch sizes to prevent UI freezing
+  - Implements a completion source pattern for load state management
+
+- **HTML Processing**
+  - Utilizes HtmlAgilityPack for reliable HTML parsing
+  - Extracts event details including:
+    - Title and description
+    - Date and time information
+    - Category classification
+    - Image URLs
+    - Event webpage links
+
+- **Data Cleaning**
+  - Handles various HTML entities and special characters
+  - Normalizes date formats from multiple input patterns
+  - Resolves relative and absolute image URLs
+  - Provides fallback images for events without pictures
+
+Example usage:
+```csharp
+var eventService = new EventService();
+await eventService.GetEventsAsync(
+    onEventProcessed: (localEvent) => {
+        // Process each event as it's scraped
+    },
+    batchSize: 12
+);
+```
+
 ## Getting Started
 
 ### 1. Clone the Repository
@@ -155,100 +203,72 @@ git clone https://github.com/davidrmellors/MunicipalServicesApplication.git
 1. After the build completes successfully, press **F5** or click the **Start** button to run the application.
 2. The main window will open, presenting options to report an issue or exit the application.
 
+
 ## How to Use the Application
 
-### Main Menu
+This section provides detailed steps on how to use the Municipal Services Platform and the underlying data structures that power each feature:
 
-- When you open the app, you will see the **Main Menu** with the following options:
-  - **Report an Issue**: Allows you to report a new issue to the municipality.
-  - **Local Events and Announcements**: This feature is currently disabled and will be implemented in a future update.
-  - **Service Request Status**: This feature is currently disabled and will be implemented in a future update.
-  - **Exit**: Exits the application.
+### 1. Login
+Access the platform by entering your South African ID number on the login screen and clicking "LOGIN".  
+**Data Structure**: Red-Black Tree for user authentication and session management
+![Login](Login.png)
 
-### Reporting an Issue
+### 2. Home Screen
+After logging in, the home screen provides an overview of critical service alerts, emergency contacts, essential service statuses, and your active service requests.  
+**Data Structures**: 
+- Emergency Notice Tree for critical alerts
+- Service Status Tree for essential service statuses
+- Red-Black Tree for active service requests
+![Home Screen](HomeScreen.png)
 
-1. Click on **Report an Issue** to open the reporting window.
-2. Enter the **location** of the issue (e.g., street name, neighborhood). The application will provide autocomplete suggestions using the Google Places API.
-3. Select the **issue category** (e.g., Sanitation, Roads, Utilities) from the dropdown.
-4. Write a **detailed description** of the issue.
-5. If applicable, click **Attach Media** to upload any relevant images or documents that help illustrate the issue.
-6. As you fill out the form, a **progress bar** will update, indicating your progress.
-7. Once all fields are complete, click **Submit** to report the issue. A confirmation message will appear, and the window will close, taking you back to the main menu.
+### 3. Report an Issue - Step 1: Select Location
+Navigate to the "Report an Issue" section. Use the location autocomplete feature to select or type the location where the issue occurred.  
+**Data Structure**: Service Request Graph for geographical clustering and location management
+![Select Location](AutoComplete.png)
 
-### Advanced Features
+### 4. Report an Issue - Step 2: Fill Details
+Choose the issue category, provide a description, and complete the necessary details for the issue report.  
+**Data Structure**: Red-Black Tree for storing and managing service requests
+![Fill Details](CompleteRequest.png)
 
-1. **Request Processing**
-   - Priority-based handling using heap structure
-   - Efficient request lookup using Red-Black Tree
-   - Related issue detection using graph structure
+### 5. Report an Issue - Step 3: Add Attachments
+Add any relevant attachments, such as images or documents, to support your issue report before submitting.  
+**Data Structure**: Red-Black Tree for attachment management linked to service requests
+![Add Attachments](AttachFiles.png)
 
-2. **Status Management**
-   - Real-time status updates
-   - Hierarchical status organization
-   - Efficient status lookup and modification
+### 6. View Local Events
+Access the "Local Events and Announcements" section to view upcoming events and announcements tailored to your municipality.  
+**Data Structures**: 
+- `SortedDictionary<DateTime, List<LocalEvent>>` for organizing events by date
+- `Dictionary<string, HashSet<LocalEvent>>` for organizing events by category
+- `Queue<LocalEvent>` for managing upcoming events
+- `Stack<LocalEvent>` for managing past events
+- `List<Announcement>` for storing announcements
+![Local Events](LocalEventsAndAnnouncements.png)
 
-3. **Performance Features**
-   - O(log n) operations for core functionalities
-   - Memory-efficient data structures
-   - Scalable architecture for growing municipalities
+### 7. Filter Events
+Use the filter options to search for events based on categories or specific dates.  
+**Data Structure**: Uses the same collections as above, with LINQ queries for filtering
+![Filter Events](FilterEvents.png)
 
-## File Structure
+### 8. Check Service Request Status - Step 1: Search by ID
+In the "Request Status" section, search for your request using its unique request ID.  
+**Data Structure**: Red-Black Tree for O(log n) request lookup
+![Search for Request](SearchForRequestAndViewDetails.png)
 
-The project follows a structured folder layout:
+### 9. Copy Request ID
+Quickly copy the unique ID for any of your requests to your clipboard for easy sharing or reference.  
+**Data Structure**: Red-Black Tree for request ID management
+![Copy Request ID](CopyRequestID.png)
 
-```
-MunicipalServicesApplication/
-├── MunicipalServices.Core/
-│   ├── DataStructures/
-│   │   ├── DisjointSet.cs
-│   │   ├── EmergencyNoticeNode.cs
-│   │   ├── EmergencyNoticeTree.cs
-│   │   ├── RedBlackTree.cs
-│   │   ├── ServiceRequestBST.cs
-│   │   ├── ServiceRequestGraph.cs
-│   │   ├── ServiceRequestHeap.cs
-│   │   ├── ServiceRequestNode.cs
-│   │   ├── ServiceRequestTree.cs
-│   │   └── ServiceStatusTree.cs
-│   └── Services/
-│       ├── AnnouncementService.cs
-│       ├── DatabaseService.cs
-│       ├── EmergencyManager.cs
-│       ├── EmergencyResponseCoordinator.cs
-│       ├── EventService.cs
-│       └── GooglePlacesService.cs
-├── MunicipalServices.Models/
-│   ├── Announcement.cs
-│   ├── Attachment.cs
-│   ├── CommunityStat.cs
-│   ├── Coordinates.cs
-│   ├── CurrentUser.cs
-│   ├── EmergencyNotice.cs
-│   └── GooglePlacesModel.cs
-├── Views/
-│   ├── DashboardView.xaml
-│   ├── LocalEventsWindow.xaml
-│   ├── LoginWindow.xaml
-│   ├── MainWindow.xaml
-│   ├── ReportIssuesWindow.xaml
-│   └── ServiceRequestStatusView.xaml
-```
+### 10. Check Service Request Status - Step 2: View Details
+View the detailed status of your service request, including attachments and related issues.  
+**Data Structures**: 
+- Service Status Tree for status hierarchy
+- Service Request Graph for related issues
+- Priority Heap for emergency and high-priority requests
+![View Request Details](ServiceRequests.png)
 
-## Technical Documentation
+---
 
-For detailed technical documentation about the implementation of data structures and algorithms, please refer to the following files:
-
-- `MunicipalServices.Core/DataStructures/RedBlackTree.cs`
-- `MunicipalServices.Core/DataStructures/ServiceRequestHeap.cs`
-- `MunicipalServices.Core/DataStructures/ServiceRequestGraph.cs`
-- `MunicipalServices.Core/DataStructures/ServiceStatusTree.cs`
-- `MunicipalServices.Core/DataStructures/EmergencyNoticeTree.cs`
-
-## Future Updates
-
-- **Service Request Tracking**: A feature to track the status of reported issues and requests.
-- **Local Events and Announcements**: A section that will provide information about local municipal events and announcements.
-
-## Contact
-
-If you encounter any issues or have suggestions for improvements, feel free to reach out at st10241466@vcconnect.edu.za
+For any additional assistance or questions, please contact support at [support@municipalservices.gov.za](mailto:support@municipalservices.gov.za).

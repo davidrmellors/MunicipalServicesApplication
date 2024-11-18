@@ -11,17 +11,32 @@ using System.Data.SQLite;
 
 namespace MunicipalServices.Core.Services
 {
+//-------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Manages service requests, including processing new requests and finding related issues
+    /// </summary>
     public class ServiceRequestManager
     {
         private readonly ServiceRequestGraph _requestGraph;
         private readonly RedBlackTree _requestTree;
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Initializes a new instance of the ServiceRequestManager class
+        /// </summary>
         public ServiceRequestManager()
         {
             _requestGraph = new ServiceRequestGraph();
             _requestTree = new RedBlackTree();
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Processes a new service request by saving it to the database and updating related data structures
+        /// </summary>
+        /// <param name="request">The service request to process</param>
+        /// <exception cref="ArgumentNullException">Thrown when request is null</exception>
+        /// <exception cref="InvalidOperationException">Thrown when request processing fails</exception>
         public void ProcessNewRequest(ServiceRequest request)
         {
             if (request == null)
@@ -62,6 +77,12 @@ namespace MunicipalServices.Core.Services
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Finds service requests that are related to a given request ID based on location, category and time
+        /// </summary>
+        /// <param name="requestId">The ID of the request to find related issues for</param>
+        /// <returns>A collection of related service requests</returns>
         public IEnumerable<ServiceRequest> GetRelatedIssues(string requestId)
         {
             try
@@ -100,6 +121,13 @@ namespace MunicipalServices.Core.Services
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Calculates the distance between two geographic coordinates using the Haversine formula
+        /// </summary>
+        /// <param name="coord1">The first coordinate</param>
+        /// <param name="coord2">The second coordinate</param>
+        /// <returns>The distance between the coordinates in meters</returns>
         private double CalculateDistance(Coordinates coord1, Coordinates coord2)
         {
             // Haversine formula to calculate distance between two points
@@ -116,5 +144,8 @@ namespace MunicipalServices.Core.Services
 
             return R * c; // Distance in meters
         }
+
+//-------------------------------------------------------------------------------------------------------------
     }
 }
+//-----------------------------------------------------END-OF-FILE-----------------------------------------------------//

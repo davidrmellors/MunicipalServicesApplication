@@ -14,15 +14,29 @@ using System.Windows.Threading;
 
 namespace MunicipalServicesApplication.Views
 {
+//-------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Main dashboard view that displays service statuses, emergency notices, and user requests
+    /// </summary>
     public partial class DashboardView : UserControl
     {
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Event raised when navigation to another view is requested
+        /// </summary>
         public event EventHandler<string> NavigationRequested;
+
         private readonly EmergencyNoticeTree noticesTree;
         private readonly ServiceStatusTree statusTree;
         private readonly CurrentUser currentUser;
         private readonly ServiceRequestManager _requestManager;
         private bool _isInitialized;
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Initializes a new instance of the DashboardView class
+        /// </summary>
+        /// <param name="user">The current user</param>
         public DashboardView(CurrentUser user)
         {
             InitializeComponent();
@@ -46,6 +60,10 @@ namespace MunicipalServicesApplication.Views
             };
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles the click event for viewing a service request's details
+        /// </summary>
         private async void ViewRequest_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.DataContext is ServiceRequest request)
@@ -75,8 +93,10 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
-
-
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Loads all dashboard data asynchronously including requests, alerts, and statistics
+        /// </summary>
         private async Task LoadDashboardDataAsync()
         {
             try
@@ -166,18 +186,35 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Determines the status text based on the count of issues
+        /// </summary>
+        /// <param name="count">Number of active issues</param>
+        /// <returns>Status text indicating operational state</returns>
         private string DetermineStatus(int count)
         {
             if (count > 0) return "Issues Reported";  // If there are any active requests
             return "Operational";
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Determines the status color based on the count of issues
+        /// </summary>
+        /// <param name="count">Number of active issues</param>
+        /// <returns>Color code for the status</returns>
         private string DetermineStatusColor(int count)
         {
             if (count > 0) return "#E03C31";  // Red if there are issues
             return "#007A4D";  // Green if operational
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Updates statistics based on user requests
+        /// </summary>
+        /// <param name="userRequests">List of user service requests</param>
         private void UpdateStatistics(List<ServiceRequest> userRequests)
         {
             var activeRequests = userRequests.Count(r => r.Status == "Pending");
@@ -186,6 +223,11 @@ namespace MunicipalServicesApplication.Views
                 r.ResolvedDate?.Month == DateTime.Now.Month);
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Loads additional data for a list of service requests
+        /// </summary>
+        /// <param name="requests">List of service requests to load data for</param>
         private async Task LoadAdditionalDataAsync(List<ServiceRequest> requests)
         {
             foreach (var request in requests)
@@ -205,12 +247,25 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Calculates the progress percentage
+        /// </summary>
+        /// <param name="value">Current value</param>
+        /// <param name="total">Total value</param>
+        /// <returns>Percentage as a double</returns>
         private double CalculateProgressPercentage(int value, int total)
         {
             if (total == 0) return 0;
             return (double)value / total * 100;
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Calculates the average response time for resolved requests
+        /// </summary>
+        /// <param name="requests">List of service requests</param>
+        /// <returns>Formatted string representing average response time</returns>
         private string CalculateAverageResponseTime(List<ServiceRequest> requests)
         {
             var resolvedRequests = requests.Where(r => r.Status == "Resolved" && r.ResolvedDate.HasValue);
@@ -225,6 +280,12 @@ namespace MunicipalServicesApplication.Views
                 : $"{avgTimeSpan.TotalHours:F1} hours";
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Calculates the response time progress percentage
+        /// </summary>
+        /// <param name="requests">List of service requests</param>
+        /// <returns>Progress percentage as a double</returns>
         private double CalculateResponseTimeProgress(List<ServiceRequest> requests)
         {
             var resolvedRequests = requests.Where(r => r.Status == "Resolved" && r.ResolvedDate.HasValue);
@@ -238,11 +299,19 @@ namespace MunicipalServicesApplication.Views
             return Math.Min(100, (targetDays - avgDays) / targetDays * 100);
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Refreshes all dashboard data
+        /// </summary>
         public async Task RefreshData()
         {
             await LoadDashboardDataAsync();
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles the click event for copying a request ID
+        /// </summary>
         private async void CopyRequestId_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
@@ -261,6 +330,12 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Attempts to copy text to clipboard with multiple fallback methods
+        /// </summary>
+        /// <param name="text">Text to copy to clipboard</param>
+        /// <returns>True if successful, false otherwise</returns>
         private async Task<bool> TryCopyToClipboard(string text)
         {
             int retryCount = 3;
@@ -337,24 +412,42 @@ namespace MunicipalServicesApplication.Views
             return false;
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles navigation to Events view
+        /// </summary>
         private void BtnEvents_Click(object sender, RoutedEventArgs e)
         {
             NavigationRequested?.Invoke(this, "Events");
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles navigation to Report Issues view
+        /// </summary>
         private void BtnReportIssues_Click(object sender, RoutedEventArgs e)
         {
             NavigationRequested?.Invoke(this, "ReportIssues");
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles navigation to Status view
+        /// </summary>
         private void BtnStatus_Click(object sender, RoutedEventArgs e)
         {
             NavigationRequested?.Invoke(this, "Status");
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles application exit
+        /// </summary>
         private void BtnExit_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
         }
+//-------------------------------------------------------------------------------------------------------------
     }
 }
+//-----------------------------------------------------END-OF-FILE-----------------------------------------------------//

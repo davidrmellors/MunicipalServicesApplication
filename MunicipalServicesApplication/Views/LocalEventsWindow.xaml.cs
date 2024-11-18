@@ -1,4 +1,9 @@
-﻿using System;
+﻿//-------------------------------------------------------------------------------------------------------------
+/// <summary>
+/// Main window for displaying and managing local events. Implements event filtering, pagination,
+/// recommendations, and announcements functionality.
+/// </summary>
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -15,6 +20,10 @@ using MunicipalServices.Models;
 
 namespace MunicipalServicesApplication.Views
 {
+//-------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Interaction logic for LocalEventsWindow.xaml
+    /// </summary>
     public partial class LocalEventsWindow : UserControl, INotifyPropertyChanged
     {
         private EventService _eventService;
@@ -24,6 +33,10 @@ namespace MunicipalServicesApplication.Views
         private const int EventsPerPage = 12;
         private bool _isLoading;
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Collections for organizing events by different criteria
+        /// </summary>
         private SortedDictionary<DateTime, List<LocalEvent>> eventsByDate;
         private Dictionary<string, HashSet<LocalEvent>> eventsByCategory;
         private Queue<LocalEvent> upcomingEvents;
@@ -37,8 +50,16 @@ namespace MunicipalServicesApplication.Views
         private List<Announcement> _announcements;
         private DispatcherTimer _announcementTimer;
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Event raised when user requests to return to main menu
+        /// </summary>
         public event EventHandler BackToMainRequested;
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Gets or sets the list of recommended events for current user
+        /// </summary>
         public List<LocalEvent> RecommendedEvents
         {
             get => _recommendedEvents;
@@ -49,8 +70,16 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Command for opening event URLs in browser
+        /// </summary>
         public ICommand OpenEventUrlCommand { get; private set; }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Gets or sets loading state
+        /// </summary>
         public bool IsLoading
         {
             get => _isLoading;
@@ -62,6 +91,10 @@ namespace MunicipalServicesApplication.Views
         }
 
         private string _loadingStatus;
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Gets or sets loading status message
+        /// </summary>
         public string LoadingStatus
         {
             get => _loadingStatus;
@@ -72,6 +105,10 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Gets or sets currently displayed events
+        /// </summary>
         public List<LocalEvent> DisplayedEvents
         {
             get => _displayedEvents;
@@ -82,6 +119,10 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Gets or sets current page number
+        /// </summary>
         public int CurrentPage
         {
             get => _currentPage;
@@ -93,12 +134,20 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Gets total number of pages based on events count
+        /// </summary>
         public int TotalPages
         {
             get => Math.Max((_allEvents?.Count ?? 0 + EventsPerPage - 1) / EventsPerPage, 1);
             private set { } // Add a private setter to avoid the CS0200 error
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Initializes a new instance of LocalEventsWindow
+        /// </summary>
         public LocalEventsWindow()
         {
             InitializeComponent();
@@ -117,6 +166,10 @@ namespace MunicipalServicesApplication.Views
             Loaded += LocalEventsWindow_Loaded;
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles window loaded event
+        /// </summary>
         private async void LocalEventsWindow_Loaded(object sender, RoutedEventArgs e)
         {
             await LoadAnnouncements();
@@ -128,6 +181,10 @@ namespace MunicipalServicesApplication.Views
             
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Loads announcements from service
+        /// </summary>
         private async Task LoadAnnouncements()
         {
             _announcements = await _announcementService.GetAnnouncementsAsync();
@@ -143,7 +200,10 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
-
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Adds an announcement to the UI
+        /// </summary>
         private void AddAnnouncementToUI(Announcement announcement)
         {
             var textBlock = new TextBlock
@@ -170,6 +230,10 @@ namespace MunicipalServicesApplication.Views
             AnnouncementsStackPanel.Children.Add(button);
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Opens announcement URL in default browser
+        /// </summary>
         private void OpenAnnouncementUrl(string url)
         {
             if (!string.IsNullOrEmpty(url))
@@ -178,12 +242,19 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Starts announcement scrolling animation
+        /// </summary>
         private void StartAnnouncementAnimation()
         {
             CompositionTarget.Rendering += AnnouncementAnimation_Tick;
         }
 
-
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles announcement animation tick
+        /// </summary>
         private void AnnouncementAnimation_Tick(object sender, EventArgs e)
         {
             if (AnnouncementsScrollViewer == null || AnnouncementsStackPanel == null) return;
@@ -202,6 +273,10 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Loads events from service and initializes display
+        /// </summary>
         private async Task LoadEvents()
         {
             try
@@ -264,23 +339,12 @@ namespace MunicipalServicesApplication.Views
             }
 
             RecommendedEvents = _eventService.GetRecommendedEvents(_currentUser, 5);
-            //UpdateRecommendedEvents();
         }
 
-        //private void UpdateRecommendedEvents()
-        //{
-        //    RecommendedEventsItemsControl.ItemsSource = null;
-        //    RecommendedEvents = _eventService.GetRecommendedEvents(_currentUser, 5);
-        //    RecommendedEventsItemsControl.ItemsSource = RecommendedEvents;
-        //    Console.WriteLine($"UpdateRecommendedEvents called. Count: {RecommendedEvents?.Count ?? 0}");
-        //    foreach (var evt in RecommendedEvents)
-        //    {
-        //        Console.WriteLine($"Event: {evt.Title}, {evt.DateString}, {evt.Category}");
-        //    }
-
-
-        //}
-
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Adds an event to the various collections
+        /// </summary>
         private void AddEvent(LocalEvent evt)
         {
             // Add to eventsByDate
@@ -309,11 +373,19 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Populates category filter dropdown
+        /// </summary>
         private void PopulateCategories()
         {
             CategoryFilter.ItemsSource = eventsByCategory.Keys.ToList();
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Updates displayed events based on current filters and pagination
+        /// </summary>
         private void UpdateDisplayedEvents()
         {
             var filteredEvents = _allEvents;
@@ -359,6 +431,10 @@ namespace MunicipalServicesApplication.Views
             OnPropertyChanged(nameof(TotalPages));
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Applies filters to event collection
+        /// </summary>
         private IEnumerable<LocalEvent> ApplyFilters(IEnumerable<LocalEvent> events)
         {
             // Apply search filter
@@ -384,6 +460,10 @@ namespace MunicipalServicesApplication.Views
             return events.OrderBy(e => e.Date);
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Truncates description text to specified length
+        /// </summary>
         private string TruncateDescription(string description, int maxLength = 200)
         {
             if (string.IsNullOrEmpty(description) || description.Length <= maxLength)
@@ -392,11 +472,19 @@ namespace MunicipalServicesApplication.Views
             return description.Substring(0, maxLength) + "...";
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles apply filters button click
+        /// </summary>
         private void ApplyFilters_Click(object sender, RoutedEventArgs e)
         {
             UpdateDisplayedEvents();
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles clear filters button click
+        /// </summary>
         private void ClearFilters_Click(object sender, RoutedEventArgs e)
         {
             SearchBox.Text = string.Empty;
@@ -405,6 +493,10 @@ namespace MunicipalServicesApplication.Views
             UpdateDisplayedEvents();
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles search box text changes
+        /// </summary>
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             CurrentPage = 1;
@@ -412,6 +504,10 @@ namespace MunicipalServicesApplication.Views
             UpdateDisplayedEvents();
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles category filter selection changes
+        /// </summary>
         private void CategoryFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             CurrentPage = 1;
@@ -422,12 +518,20 @@ namespace MunicipalServicesApplication.Views
             UpdateDisplayedEvents();
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles date filter selection changes
+        /// </summary>
         private void DateFilter_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
             CurrentPage = 1;
             UpdateDisplayedEvents();
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Opens event URL in default browser
+        /// </summary>
         private void OpenEventUrl(string url)
         {
             if (!string.IsNullOrEmpty(url))
@@ -441,6 +545,10 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles previous page button click
+        /// </summary>
         private void PreviousPageButton_Click(object sender, RoutedEventArgs e)
         {
             if (CurrentPage > 1)
@@ -450,6 +558,10 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles next page button click
+        /// </summary>
         private void NextPageButton_Click(object sender, RoutedEventArgs e)
         {
             if (CurrentPage < TotalPages)
@@ -459,40 +571,72 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
-
-
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles back to main menu button click
+        /// </summary>
         private void BackToMainMenu_Click(object sender, RoutedEventArgs e)
         {
             BackToMainRequested?.Invoke(this, EventArgs.Empty);
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Property changed event handler
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Raises PropertyChanged event
+        /// </summary>
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 
+//-------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Generic relay command implementation
+    /// </summary>
     public class RelayCommand<T> : ICommand
     {
         private readonly Action<T> _execute;
         private readonly Func<T, bool> _canExecute;
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Initializes relay command with execute and optional canExecute functions
+        /// </summary>
         public RelayCommand(Action<T> execute, Func<T, bool> canExecute = null)
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// CanExecuteChanged event
+        /// </summary>
         public event EventHandler CanExecuteChanged
         {
             add { CommandManager.RequerySuggested += value; }
             remove { CommandManager.RequerySuggested -= value; }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Determines if command can execute
+        /// </summary>
         public bool CanExecute(object parameter) => _canExecute == null || _canExecute((T)parameter);
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Executes command
+        /// </summary>
         public void Execute(object parameter) => _execute((T)parameter);
     }
+//-------------------------------------------------------------------------------------------------------------
 }
+//-----------------------------------------------------END-OF-FILE-----------------------------------------------------//

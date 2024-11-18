@@ -1,4 +1,9 @@
-﻿using System;
+﻿//-------------------------------------------------------------------------------------------------------------
+/// <summary>
+/// Main window for reporting municipal service issues. Handles location selection, file attachments,
+/// and service request submission.
+/// </summary>
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
@@ -15,6 +20,10 @@ using DotNetEnv;
 
 namespace MunicipalServicesApplication.Views
 {
+//-------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Interaction logic for ReportIssuesWindow.xaml
+    /// </summary>
     public partial class ReportIssuesWindow : UserControl
     {
         private List<Attachment> attachments = new List<Attachment>();
@@ -25,7 +34,12 @@ namespace MunicipalServicesApplication.Views
         private string formattedAddress;
         private readonly GooglePlacesService placesService;
         private readonly ServiceRequestManager _requestManager;
+        private const int TOTAL_REQUIRED_FIELDS = 3; // Location, Category, Description
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Initializes a new instance of the ReportIssuesWindow class
+        /// </summary>
         public ReportIssuesWindow(CurrentUser user)
         {
             InitializeComponent();
@@ -54,6 +68,10 @@ namespace MunicipalServicesApplication.Views
             _requestManager = new ServiceRequestManager();
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles location textbox text changes and updates location suggestions
+        /// </summary>
         private async void Location_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (LocationSuggestionsList == null) return;
@@ -91,8 +109,10 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
-        
-
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles location suggestion selection and retrieves place details
+        /// </summary>
         private async void LocationSuggestion_Selected(object sender, SelectionChangedEventArgs e)
         {
             var selectedItem = LocationSuggestionsList.SelectedItem;
@@ -109,6 +129,7 @@ namespace MunicipalServicesApplication.Views
                     
                     TxtLocation.Text = prediction.Description;
                     LocationSuggestionsList.Visibility = Visibility.Collapsed;
+                    UpdateProgress();
                     
                 }
                 catch (Exception ex)
@@ -119,6 +140,10 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles file attachment selection and processing
+        /// </summary>
         private void AttachFiles_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -151,11 +176,19 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Updates the attachment count display
+        /// </summary>
         private void UpdateAttachmentCount()
         {
             TxtAttachmentCount.Text = $"{attachments.Count} file(s) attached";
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles service request submission
+        /// </summary>
         private void SubmitButton_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(TxtLocation.Text) || TxtLocation.Text == "Enter Location" ||
@@ -210,11 +243,19 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Generates a unique request ID
+        /// </summary>
         private string GenerateRequestId()
         {
             return $"REQ-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8)}";
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles textbox focus events
+        /// </summary>
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             TextBox textBox = (TextBox)sender;
@@ -224,6 +265,10 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Clears all form fields and resets state
+        /// </summary>
         private void ClearForm()
         {
             TxtLocation.Text = "Enter Location";
@@ -234,8 +279,13 @@ namespace MunicipalServicesApplication.Views
             selectedLongitude = 0;
             formattedAddress = string.Empty;
             UpdateAttachmentCount();
+            UpdateProgress();
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles textbox lost focus events
+        /// </summary>
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             TextBox textBox = (TextBox)sender;
@@ -243,13 +293,53 @@ namespace MunicipalServicesApplication.Views
             {
                 textBox.Text = textBox.Name == "TxtLocation" ? "Enter Location" : "Enter Description";
             }
+            UpdateProgress();
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles navigation back to main menu
+        /// </summary>
         private void BackToMainMenu_Click(object sender, RoutedEventArgs e)
         {
             BackToMainRequested?.Invoke(this, EventArgs.Empty);
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Updates the progress bar based on the number of filled fields
+        /// </summary>
+        private void UpdateProgress()
+        {
+            int completedFields = 0;
 
+            // Check location
+            if (!string.IsNullOrWhiteSpace(TxtLocation.Text) && TxtLocation.Text != "Enter Location")
+                completedFields++;
+
+            // Check category
+            if (CmbCategory.SelectedItem != null)
+                completedFields++;
+
+            // Check description
+            if (!string.IsNullOrWhiteSpace(TxtDescription.Text) && TxtDescription.Text != "Enter Description")
+                completedFields++;
+
+            // Calculate percentage
+            double progressPercentage = (completedFields / (double)TOTAL_REQUIRED_FIELDS) * 100;
+            ProgressBar.Value = progressPercentage;
+        }
+
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles category selection
+        /// </summary>
+        private void CmbCategory_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateProgress();
+        }
+
+//-------------------------------------------------------------------------------------------------------------
     }
 }
+//-----------------------------------------------------END-OF-FILE-----------------------------------------------------//

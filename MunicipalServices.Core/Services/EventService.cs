@@ -9,13 +9,22 @@ using MunicipalServices.Models;
 
 namespace MunicipalServices.Core.Services
 {
+//-------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Service for fetching and managing local events from an external events website
+    /// </summary>
     public class EventService
     {
+//-------------------------------------------------------------------------------------------------------------
         private const string BASE_URL = "https://eventsincapetown.com/all-events/";
         private readonly HttpClient _httpClient;
         private List<LocalEvent> _allEvents;
         private bool _isLoading;
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Initializes a new instance of the EventService class
+        /// </summary>
         public EventService()
         {
             _httpClient = new HttpClient();
@@ -25,14 +34,35 @@ namespace MunicipalServices.Core.Services
 
         private TaskCompletionSource<bool> _loadingCompletionSource = new TaskCompletionSource<bool>();
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Waits for the initial event load to complete
+        /// </summary>
+        /// <returns>A task that completes when initial loading is done</returns>
         public Task WaitForInitialLoadAsync()
         {
             return _loadingCompletionSource.Task;
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Gets whether events are currently being loaded
+        /// </summary>
         public bool IsLoading => _isLoading;
+
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Gets a read-only list of all loaded events
+        /// </summary>
         public IReadOnlyList<LocalEvent> AllEvents => _allEvents.AsReadOnly();
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Fetches events from the external website and processes them in batches
+        /// </summary>
+        /// <param name="onEventProcessed">Callback action executed for each processed event</param>
+        /// <param name="batchSize">Number of events to process before yielding to the UI thread</param>
+        /// <returns>A task representing the asynchronous operation</returns>
         public async Task GetEventsAsync(Action<LocalEvent> onEventProcessed, int batchSize = 12)
         {
             if (_isLoading) return;
@@ -61,8 +91,6 @@ namespace MunicipalServices.Core.Services
                                 var categoryNode = eventNode.SelectSingleNode(".//span[@class='mec-category']");
                                 var imageNode = eventNode.SelectSingleNode(".//img[contains(@class, 'attachment-full') and contains(@class, 'size-full')]");
 
-                                
-
                                 if (!string.IsNullOrEmpty(eventUrl))
                                 {
                                     var title = titleNode?.InnerText.Trim() ?? "No Title";
@@ -90,7 +118,7 @@ namespace MunicipalServices.Core.Services
                                         {
                                             Title = title,
                                             Date = parsedDate,
-                                            DateString = originalDateString, // Store the original date string
+                                            DateString = originalDateString,
                                             Description = description,
                                             Category = category,
                                             ImageUrl = imageUrl,
@@ -131,14 +159,18 @@ namespace MunicipalServices.Core.Services
             {
                 Console.WriteLine($"Error fetching events: {ex.Message}");
             }
-
             finally
             {
                 _isLoading = false;
             }
         }
 
-
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Fetches and parses the description for a specific event
+        /// </summary>
+        /// <param name="eventUrl">URL of the event page</param>
+        /// <returns>The parsed event description, or null if not found</returns>
         private async Task<String> GetEventDescriptionAsync(string eventUrl)
         {
             try
@@ -178,6 +210,12 @@ namespace MunicipalServices.Core.Services
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Fetches and parses the date for a specific event
+        /// </summary>
+        /// <param name="eventUrl">URL of the event page</param>
+        /// <returns>A tuple containing the parsed DateTime and original date string</returns>
         private async Task<(DateTime, string)> GetEventDateAsync(string eventUrl)
         {
             try
@@ -229,6 +267,13 @@ namespace MunicipalServices.Core.Services
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Gets recommended events for a user based on their preferences and history
+        /// </summary>
+        /// <param name="user">The current user</param>
+        /// <param name="count">Number of recommendations to return</param>
+        /// <returns>List of recommended events</returns>
         public List<LocalEvent> GetRecommendedEvents(CurrentUser user, int count)
         {
             var recommendedEvents = new List<LocalEvent>();
@@ -282,6 +327,12 @@ namespace MunicipalServices.Core.Services
             return recommendedEvents.Take(count).ToList();
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Parses a date string into a DateTime object
+        /// </summary>
+        /// <param name="dateString">The date string to parse</param>
+        /// <returns>A tuple containing the parsed DateTime and original date string</returns>
         private (DateTime, string) ParseDate(string dateString)
         {
             dateString = dateString.Trim();
@@ -349,5 +400,8 @@ namespace MunicipalServices.Core.Services
             Debug.WriteLine($"Failed to parse date: {dateString}");
             return (DateTime.Now, originalDateString);
         }
+
+//-------------------------------------------------------------------------------------------------------------
     }
 }
+//-----------------------------------------------------END-OF-FILE-----------------------------------------------------//

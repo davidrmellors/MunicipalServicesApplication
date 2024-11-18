@@ -5,8 +5,21 @@ using MunicipalServices.Models;
 
 namespace MunicipalServices.Core.Services
 {
+//-------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Service for managing and retrieving municipal announcements.
+    /// Provides functionality to access public announcements and notifications.
+    /// </summary>
     public class AnnouncementService
     {
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Retrieves a list of current municipal announcements asynchronously.
+        /// </summary>
+        /// <returns>
+        /// A task that represents the asynchronous operation.
+        /// The task result contains a list of announcements ordered by date.
+        /// </returns>
         public Task<List<Announcement>> GetAnnouncementsAsync()
         {
             var announcements = new List<Announcement>
@@ -20,5 +33,8 @@ namespace MunicipalServices.Core.Services
 
             return Task.FromResult(announcements);
         }
+
+//-------------------------------------------------------------------------------------------------------------
     }
 }
+//-----------------------------------------------------END-OF-FILE-----------------------------------------------------//

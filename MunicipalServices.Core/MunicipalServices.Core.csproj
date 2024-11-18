@@ -87,11 +87,9 @@
     <ProjectReference Include="..\MunicipalServices.Models\MunicipalServices.Models.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataStructures\DisjointSet.cs" />
     <Compile Include="DataStructures\EmergencyNoticeNode.cs" />
     <Compile Include="DataStructures\EmergencyNoticeTree.cs" />
     <Compile Include="DataStructures\RedBlackTree.cs" />
-    <Compile Include="DataStructures\ServiceRequestBST.cs" />
     <Compile Include="DataStructures\ServiceRequestGraph.cs" />
     <Compile Include="DataStructures\ServiceRequestHeap.cs" />
     <Compile Include="DataStructures\ServiceRequestNode.cs" />
@@ -100,18 +98,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AnnouncementService.cs" />
     <Compile Include="Services\DatabaseService.cs" />
-    <Compile Include="Services\EmergencyManager.cs" />
-    <Compile Include="Services\EmergencyResponseCoordinator.cs" />
     <Compile Include="Services\EventService.cs" />
     <Compile Include="Services\GooglePlacesService.cs" />
     <Compile Include="Services\Logger.cs" />
-    <Compile Include="Services\NotificationService.cs" />
-    <Compile Include="Services\RelayCommand.cs" />
-    <Compile Include="Services\ServiceAnalytics.cs" />
     <Compile Include="Services\ServiceRequestManager.cs" />
-    <Compile Include="Services\SvgToImageSourceConverter.cs" />
     <Compile Include="Services\UserProfileService.cs" />
-    <Compile Include="Validators\IssueValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

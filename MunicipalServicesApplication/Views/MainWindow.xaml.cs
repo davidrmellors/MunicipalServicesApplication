@@ -1,4 +1,9 @@
-﻿using System;
+﻿//-------------------------------------------------------------------------------------------------------------
+/// <summary>
+/// Main window for the municipal services application. Manages navigation between different views
+/// and maintains user state.
+/// </summary>
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using MunicipalServices.Core.Services;
@@ -7,6 +12,10 @@ using System.Threading.Tasks;
 
 namespace MunicipalServicesApplication.Views
 {
+//-------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
     public partial class MainWindow : Window
     {
         private readonly UserProfileService _userService;
@@ -15,6 +24,10 @@ namespace MunicipalServicesApplication.Views
         private bool isMetricsWindowShown;
         public CurrentUser CurrentUser { get; private set; }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Initializes a new instance of the MainWindow class
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
@@ -26,6 +39,10 @@ namespace MunicipalServicesApplication.Views
             SwitchView(_dashboardView);
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Initializes the application asynchronously, setting up the user profile and dashboard
+        /// </summary>
         private async Task InitializeApplicationAsync()
         {
             try
@@ -46,6 +63,10 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles navigation requests between different views
+        /// </summary>
         private void OnNavigationRequested(object sender, string destination)
         {
             switch (destination)
@@ -65,6 +86,10 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Switches the current view to a new view and sets up appropriate event handlers
+        /// </summary>
         private void SwitchView(UserControl newView)
         {
             // Create the new view immediately
@@ -95,6 +120,7 @@ namespace MunicipalServicesApplication.Views
                 _ = Task.Run(async () => await _dashboardView.RefreshData());
             }
         }
-
+//-------------------------------------------------------------------------------------------------------------
     }
 }
+//-----------------------------------------------------END-OF-FILE-----------------------------------------------------//

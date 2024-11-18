@@ -1,4 +1,8 @@
-﻿using System;
+﻿/// <summary>
+/// Main view for displaying and managing service request statuses. Handles request loading,
+/// searching, attachments, and related functionality.
+/// </summary>
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,8 +20,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Timers;
 
+//-------------------------------------------------------------------------------------------------------------
+
 namespace MunicipalServicesApplication.Views
 {
+    /// <summary>
+    /// Interaction logic for ServiceRequestStatusView.xaml
+    /// </summary>
     public partial class ServiceRequestStatusView : UserControl
     {
         public event EventHandler BackToMainRequested;
@@ -29,6 +38,11 @@ namespace MunicipalServicesApplication.Views
         private bool isLoadingMore = false;
         private List<ServiceRequest> loadedRequests = new List<ServiceRequest>();
 
+        //-------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Initializes a new instance of the ServiceRequestStatusView class
+        /// </summary>
         public ServiceRequestStatusView()
         {
             InitializeComponent();
@@ -37,6 +51,11 @@ namespace MunicipalServicesApplication.Views
             _ = LoadInitialDataAsync();
         }
 
+        //-------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Loads the initial data asynchronously, setting up pagination and scroll handlers
+        /// </summary>
         private async Task LoadInitialDataAsync()
         {
             await ShowLoadingAsync(async () =>
@@ -56,6 +75,11 @@ namespace MunicipalServicesApplication.Views
             });
         }
 
+        //-------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Loads a page of service requests with the specified page number
+        /// </summary>
         private async Task<List<ServiceRequest>> LoadRequestsPage(int page)
         {
             var allRequests = await Task.Run(() => DatabaseService.Instance.GetAllRequests());
@@ -92,6 +116,11 @@ namespace MunicipalServicesApplication.Views
             return loadedRequests;
         }
 
+        //-------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Handles scroll events for infinite scrolling pagination
+        /// </summary>
         private async void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             var scrollViewer = (ScrollViewer)sender;
@@ -109,6 +138,11 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+        //-------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Sets up the search timer for delayed search functionality
+        /// </summary>
         private void SetupSearchTimer()
         {
             _searchTimer = new System.Timers.Timer(300); // 300ms delay
@@ -124,12 +158,22 @@ namespace MunicipalServicesApplication.Views
             SearchRequestId.TextChanged += SearchRequestId_TextChanged;
         }
 
+        //-------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Handles text changes in the search box
+        /// </summary>
         private void SearchRequestId_TextChanged(object sender, TextChangedEventArgs e)
         {
             _searchTimer.Stop(); // Reset the timer
             _searchTimer.Start(); // Start the timer again
         }
 
+        //-------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Performs the search operation with the given search text
+        /// </summary>
         private async Task PerformSearch(string searchText)
         {
             // Disable scroll event handler during search
@@ -173,6 +217,11 @@ namespace MunicipalServicesApplication.Views
             });
         }
 
+        //-------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Shows loading overlay while performing an async action
+        /// </summary>
         private async Task ShowLoadingAsync(Func<Task> action)
         {
             if (_isLoading) return;
@@ -197,11 +246,21 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+        //-------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Handles navigation back to main menu
+        /// </summary>
         private void BackToMain_Click(object sender, RoutedEventArgs e)
         {
             BackToMainRequested?.Invoke(this, EventArgs.Empty);
         }
 
+        //-------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Handles viewing of request attachments
+        /// </summary>
         private void ViewAttachment_Click(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("ViewAttachment_Click triggered");
@@ -251,6 +310,11 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+        //-------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Handles copying of request ID to clipboard
+        /// </summary>
         private async void CopyRequestId_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.DataContext is ServiceRequest request)
@@ -300,7 +364,11 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
-        // Add this method to handle expander state changes
+        //-------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Handles expansion of request details, loading attachments and related issues
+        /// </summary>
         private async void Expander_Expanded(object sender, RoutedEventArgs e)
         {
             if (sender is Expander expander && expander.DataContext is ServiceRequest request)
@@ -328,6 +396,11 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+        //-------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Verifies and logs attachment information for debugging purposes
+        /// </summary>
         private void VerifyAttachments(ServiceRequest request)
         {
             if (request != null)
@@ -343,5 +416,7 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+        //-------------------------------------------------------------------------------------------------------------
     }
 }
+//-----------------------------------------------------END-OF-FILE-----------------------------------------------------//

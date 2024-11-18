@@ -1,17 +1,32 @@
-﻿using System.Windows;
+﻿//-------------------------------------------------------------------------------------------------------------
+/// <summary>
+/// Main window for user login. Validates South African ID numbers and manages user authentication.
+/// </summary>
+using System.Windows;
 using System.Text.RegularExpressions;
 using MunicipalServices.Core.Services;
 
 namespace MunicipalServicesApplication.Views
 {
+//-------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Interaction logic for LoginWindow.xaml
+    /// </summary>
     public partial class LoginWindow : Window
     {
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Initializes a new instance of the LoginWindow class
+        /// </summary>
         public LoginWindow()
         {
             InitializeComponent();
         }
 
-
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles the login button click event. Validates ID number and creates/retrieves user profile.
+        /// </summary>
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             string idNumber = TxtIdNumber.Text.Trim();
@@ -38,10 +53,18 @@ namespace MunicipalServicesApplication.Views
             }
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handles the close button click event
+        /// </summary>
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Validates if the provided string matches South African ID number format
+        /// </summary>
         private bool IsValidSouthAfricanID(string idNumber)
         {
             // Regex breakdown:
@@ -58,17 +81,26 @@ namespace MunicipalServicesApplication.Views
             return Regex.IsMatch(idNumber, pattern);
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Displays an error message to the user
+        /// </summary>
         private void ShowError(string message)
         {
             LblError.Text = message;
             LblError.Visibility = Visibility.Visible;
         }
 
+//-------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Hides the error message display
+        /// </summary>
         private void HideError()
         {
             LblError.Text = string.Empty;
             LblError.Visibility = Visibility.Collapsed;
         }
-
+//-------------------------------------------------------------------------------------------------------------
     }
 }
+//-----------------------------------------------------END-OF-FILE-----------------------------------------------------//
