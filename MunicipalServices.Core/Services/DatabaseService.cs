@@ -43,28 +43,13 @@ namespace MunicipalServices.Core.Services
         private DatabaseService()
         {
             var dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DATABASE_NAME);
-            
-            // Delete existing database file if it exists
-            //if (File.Exists(dbPath))
-            //{
-            //    try
-            //    {
-            //        File.Delete(dbPath);
-            //        Logger.LogInfo("Deleted existing database file for clean initialization");
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Logger.LogError($"Failed to delete existing database: {ex.Message}");
-            //    }
-            //}
-            
             _connectionString = $"Data Source={dbPath};Version=3;";
 
-            // Create fresh tables
-            //CreateTables();
+            // Ensure database and tables are created
+            InitializeDatabaseAsync();
+            CreateTables();
 
-            // Log initialization
-
+            // Now safe to check count
             using (var connection = CreateConnection())
             {
                 var requestCount = connection.ExecuteScalar<int>("SELECT COUNT(*) FROM ServiceRequests");
